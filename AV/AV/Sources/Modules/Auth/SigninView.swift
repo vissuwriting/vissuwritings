@@ -317,40 +317,40 @@ struct IconPatternView: View {
 
 
 @available(iOS 16.0, *)
-struct Adminview: View {
+struct KavithaluView: View {
     
     var body: some View {
         NavigationStack {
-            Text(AppConstants.Dashboard.homeTitle)
-                .font(AppConstants.Dashboard.homeTitleFont)
+            Text(AppConstants.Dashboard.kavithaluTitle)
+                .font(AppConstants.Dashboard.kavithaluTitleFont)
         }
     }
 }
 
 @available(iOS 16.0, *)
-struct SearchView: View {
+struct StoryView: View {
     
     var body: some View {
         NavigationStack {
-            Text("Search Screen")
+            Text("Stories")
                 .font(.largeTitle)
         }
     }
 }
 
 @available(iOS 16.0, *)
-struct NotificationsView: View {
+struct SongsView: View {
     
     var body: some View {
         NavigationStack {
-            Text("Notifications")
+            Text("Songs")
                 .font(.largeTitle)
         }
     }
 }
 
 @available(iOS 16.0, *)
-struct ProfileView: View {
+struct AdminView: View {
     
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
     
@@ -359,7 +359,7 @@ struct ProfileView: View {
         NavigationStack {
             VStack(spacing: 20) {
                 
-                Text("Profile Screen")
+                Text("Admin Screen")
                     .font(.largeTitle)
                 
                 Button("Logout") {

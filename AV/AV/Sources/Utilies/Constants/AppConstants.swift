@@ -36,18 +36,18 @@ enum AppConstants {
     }
 
     enum Dashboard {
-        static let homeTitle = "Home Screen"
-        static let homeTitleFont = Font.largeTitle
+        static let kavithaluTitle = "Kavithalu"
+        static let kavithaluTitleFont = Font.largeTitle
 
-        static let homeTabIcon = "house.fill"
-        static let searchTabIcon = "magnifyingglass"
-        static let alertsTabIcon = "bell.fill"
-        static let profileTabIcon = "person.crop.circle"
+        static let kavithaluTabIcon = "book.pages.fill"
+        static let storyTabIcon = "text.book.closed.fill"
+        static let songsTabIcon = "music.note.list"
+        static let adminTabIcon = "person.crop.circle.fill"
 
-        static let homeTabTitle = "Home"
-        static let searchTabTitle = "Search"
-        static let alertsTabTitle = "Alerts"
-        static let profileTabTitle = "Profile"
+        static let kavithaluTabTitle = "Kavithalu"
+        static let storyTabTitle = "Stories"
+        static let songsTabTitle = "Songs"
+        static let adminTabTitle = "Admin"
     }
 
     enum IconPattern {
