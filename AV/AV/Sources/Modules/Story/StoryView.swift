@@ -13,6 +13,9 @@ struct StoryView: View {
     @State private var stories: [StoryItem] = []
     @State private var selectedCategory = AppConstants.Story.defaultCategory
     @State private var selectedStory: StoryItem?
+    @State private var isStoryActive = false
+    @State private var isFilterSwitching = false
+    @State private var cardTapBlockedUntil: Date = .distantPast
 
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguage)
@@ -25,49 +28,57 @@ struct StoryView: View {
         return stories.filter { $0.category == selectedCategory }
     }
 
-    @available(iOS 16.0, *)
     var body: some View {
         NavigationStack {
-            if #available(iOS 17.0, *) {
-                ZStack {
-                    AppColors.background
-                        .ignoresSafeArea()
-                    
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: AppConstants.Story.listSpacing) {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(AppConstants.Story.categories, id: \.self) { category in
-                                        categoryChip(category)
-                                    }
+            ZStack {
+                AppColors.background
+                    .ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: AppConstants.Story.listSpacing) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(AppConstants.Story.categories, id: \.self) { category in
+                                    categoryChip(category)
                                 }
-                                .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
                             }
-                            
-                            if filteredStories.isEmpty {
-                                Text(AppConstants.Story.emptyText(language))
-                                    .foregroundColor(Color(hex: "#6B7280"))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
-                            } else {
-                                ForEach(filteredStories) { story in
-                                    storyCard(story)
-                                        .onTapGesture {
-                                            selectedStory = story
-                                        }
-                                }
+                            .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
+                        }
+
+                        if filteredStories.isEmpty {
+                            Text(AppConstants.Story.emptyText(language))
+                                .foregroundColor(Color(hex: "#6B7280"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
+                        } else {
+                            ForEach(filteredStories) { story in
+                                storyCard(story)
+                                    .contentShape(RoundedRectangle(cornerRadius: AppConstants.Story.cardCornerRadius))
+                                    .onTapGesture {
+                                        guard Date() >= cardTapBlockedUntil else { return }
+                                        selectedStory = story
+                                        isStoryActive = true
+                                    }
+                                    .disabled(isFilterSwitching)
                             }
                         }
-                        .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
-                        .padding(.vertical, AppConstants.Story.rootVerticalPadding)
                     }
+                    .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
+                    .padding(.vertical, AppConstants.Story.rootVerticalPadding)
                 }
-                .navigationDestination(item: $selectedStory) { story in
-                    StoryDetailView(story: story, language: language)
-                }
-            } else {
-                // Fallback on earlier versions
             }
+            .background(
+                NavigationLink(isActive: $isStoryActive) {
+                    if let story = selectedStory {
+                        StoryDetailView(story: story, language: language)
+                    } else {
+                        EmptyView()
+                    }
+                } label: {
+                    EmptyView()
+                }
+                .hidden()
+            )
         }
         .onAppear {
             stories = StoryItem.loadFromBundle(named: AppConstants.Story.jsonFileName)
@@ -77,7 +88,13 @@ struct StoryView: View {
     private func categoryChip(_ category: String) -> some View {
         let selected = selectedCategory == category
         return Button {
+            guard selectedCategory != category else { return }
+            isFilterSwitching = true
+            cardTapBlockedUntil = Date().addingTimeInterval(0.6)
             selectedCategory = category
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                isFilterSwitching = false
+            }
         } label: {
             Text(AppConstants.Story.categoryLabel(category, language))
                 .font(.system(size: 14, weight: .medium))
