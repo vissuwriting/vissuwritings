@@ -57,12 +57,8 @@ struct KavithaluView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
-                    .font(.system(size: 23, weight: .bold))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(Color(hex: "#1E2A39"))
-
-                Text(item.author)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(hex: "#5B8FCB"))
                 
                 Text(item.kavithaPreview)
                     .font(.system(size: 14))
@@ -103,7 +99,6 @@ struct KavithaluView: View {
 private struct KavithaItem: Identifiable, Decodable {
     let id = UUID()
     let title: String
-    let author: String
     let fullKavitha: String
     let likes: Int
     let category: String
@@ -146,28 +141,24 @@ private extension KavithaItem {
     static let fallback: [KavithaItem] = [
         .init(
             title: "Nee Aakasham",
-            author: "Ramakrishna Rao",
             fullKavitha: "Nee akkada chupina navvu naa hrudayam lo inka alaage undi. Gaalilo tirige pratibimbam laaga nee gurtulu prati saayantram tirigi vastunnayi. Prati varsham boondalo nee maata vintunna anipistundi.",
             likes: 234,
             category: "Nature"
         ),
         .init(
             title: "Mabbuloni Velugu",
-            author: "Sarada Devi",
             fullKavitha: "Poddune velugu laanti maatallo jeevitham ki kottha sneham. Mabbullo kuda kanipinche velugu laaga manchi alochanalu manasuni prakaashistayi. Oka sari navvite prapancham motham kotha rangullo merustundi.",
             likes: 512,
             category: "Patriotic"
         ),
         .init(
             title: "Varsham Paata",
-            author: "Venkata Subbaiah",
             fullKavitha: "Gaalilo paata, varshamlo maataki artham kanipinche samayam idi. Meghalu padina prathi chota bhoomi kotha gundello palukuthundi. Ee raatri tholakari paata lo prematho kalisina jnapakalu unnayi.",
             likes: 189,
             category: "Seasons"
         ),
         .init(
             title: "Prema Kadha",
-            author: "Lakshmi Prasad",
             fullKavitha: "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu. Oka chinna choopu lo pedda prapancham untundi. Kalisi navvina kshanalu kalam daggara nilichipoye gnapakalu avuthayi.",
             likes: 678,
             category: "Love"
@@ -201,10 +192,10 @@ private struct KavithaDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
 
                 Text(item.title)
-                    .font(.system(size: 30, weight: .bold))
+                    .font(.system(size: 26, weight: .bold))
                     .foregroundColor(Color(hex: "#1E2A39"))
 
-                Text("By \(item.author)")
+                Text("By Vissu")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(Color(hex: "#5B8FCB"))
 
