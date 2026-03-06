@@ -220,3 +220,11 @@ extension SignupView {
         focusedField = nil
     }
 }
+
+#Preview {
+    if #available(iOS 16.0, *) {
+        SignupView()
+    } else {
+        EmptyView()
+    }
+}

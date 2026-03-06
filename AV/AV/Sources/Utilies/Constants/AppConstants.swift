@@ -112,13 +112,14 @@ enum AppConstants {
 
         static let headerFontSize: CGFloat = 32
         static let titleSpacing: CGFloat = 22
-        static let topSpacerHeight: CGFloat = 220
+        static let topSpacerHeight: CGFloat = 100
         static let buttonTopPadding: CGFloat = 5
         static let bottomSectionTopPadding: CGFloat = 10
         static let formHorizontalPadding: CGFloat = 35
-        static let formTopPadding: CGFloat = 70
+        static let formTopPadding: CGFloat = 85
         static let buttonCornerRadius: CGFloat = 14
         static let rootStackSpacing: CGFloat = 0
         static let fieldBorderLineWidth: CGFloat = 1
     }
 }
+
