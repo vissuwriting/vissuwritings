@@ -70,7 +70,7 @@ struct StoryView: View {
             .background(
                 NavigationLink(isActive: $isStoryActive) {
                     if let story = selectedStory {
-                        StoryDetailView(story: story, language: language)
+                        StoryDetailView(story: story, language: language) .tabBarHidden()
                     } else {
                         EmptyView()
                     }
