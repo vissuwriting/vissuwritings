@@ -1,43 +1,29 @@
 [
   {
     "title": "Nee Aakasham",
-    "preview": "Nee akkada chupina navvu naa hrudayam lo inka alaage undi...",
+    "author": "Ramakrishna Rao",
+    "fullKavitha": "Nee akkada chupina navvu naa hrudayam lo inka alaage undi. Gaalilo tirige pratibimbam laaga nee gurtulu prati saayantram tirigi vastunnayi. Prati varsham boondalo nee maata vintunna anipistundi.",
     "likes": 234,
     "category": "Nature"
   },
   {
     "title": "Mabbuloni Velugu",
-    "preview": "Poddune velugu laanti maatallo jeevitham ki kottha sneham...",
+    "author": "Sarada Devi",
+    "fullKavitha": "Poddune velugu laanti maatallo jeevitham ki kottha sneham. Mabbullo kuda kanipinche velugu laaga manchi alochanalu manasuni prakaashistayi. Oka sari navvite prapancham motham kotha rangullo merustundi.",
     "likes": 512,
     "category": "Patriotic"
   },
   {
     "title": "Varsham Paata",
-    "preview": "Gaalilo paata, varshamlo maataki artham kanipinche samayam...",
-    "likes": 189,
-    "category": "Seasons"
-  },
-  {
-    "title": "Nee Aakasham",
-    "preview": "Nee akkada chupina navvu naa hrudayam lo inka alaage undi...",
-    "likes": 234,
-    "category": "Nature"
-  },
-  {
-    "title": "Mabbuloni Velugu",
-    "preview": "Poddune velugu laanti maatallo jeevitham ki kottha sneham...",
-    "likes": 512,
-    "category": "Patriotic"
-  },
-  {
-    "title": "Varsham Paata",
-    "preview": "Gaalilo paata, varshamlo maataki artham kanipinche samayam...",
+    "author": "Venkata Subbaiah",
+    "fullKavitha": "Gaalilo paata, varshamlo maataki artham kanipinche samayam idi. Meghalu padina prathi chota bhoomi kotha gundello palukuthundi. Ee raatri tholakari paata lo prematho kalisina jnapakalu unnayi.",
     "likes": 189,
     "category": "Seasons"
   },
   {
     "title": "Prema Kadha",
-    "preview": "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu...",
+    "author": "Lakshmi Prasad",
+    "fullKavitha": "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu. Oka chinna choopu lo pedda prapancham untundi. Kalisi navvina kshanalu kalam daggara nilichipoye gnapakalu avuthayi.",
     "likes": 678,
     "category": "Love"
   }

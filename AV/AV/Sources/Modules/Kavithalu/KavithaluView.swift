@@ -21,7 +21,12 @@ struct KavithaluView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 14) {
                         ForEach(kavithalu) { item in
-                            kavithaCard(item)
+                            NavigationLink {
+                                KavithaDetailView(item: item)
+                            } label: {
+                                kavithaCard(item)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 12)
@@ -54,8 +59,12 @@ struct KavithaluView: View {
                 Text(item.title)
                     .font(.system(size: 23, weight: .bold))
                     .foregroundColor(Color(hex: "#1E2A39"))
+
+                Text(item.author)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#5B8FCB"))
                 
-                Text(item.preview)
+                Text(item.kavithaPreview)
                     .font(.system(size: 14))
                     .foregroundColor(Color(hex: "#5B6472"))
                     .lineLimit(2)
@@ -92,9 +101,10 @@ struct KavithaluView: View {
 }
 
 private struct KavithaItem: Identifiable, Decodable {
-    var id: String { "\(title)" }
+    let id = UUID()
     let title: String
-    let preview: String
+    let author: String
+    let fullKavitha: String
     let likes: Int
     let category: String
     
@@ -136,29 +146,111 @@ private extension KavithaItem {
     static let fallback: [KavithaItem] = [
         .init(
             title: "Nee Aakasham",
-            preview: "Nee akkada chupina navvu naa hrudayam lo inka alaage undi...",
+            author: "Ramakrishna Rao",
+            fullKavitha: "Nee akkada chupina navvu naa hrudayam lo inka alaage undi. Gaalilo tirige pratibimbam laaga nee gurtulu prati saayantram tirigi vastunnayi. Prati varsham boondalo nee maata vintunna anipistundi.",
             likes: 234,
             category: "Nature"
         ),
         .init(
             title: "Mabbuloni Velugu",
-            preview: "Poddune velugu laanti maatallo jeevitham ki kottha sneham...",
+            author: "Sarada Devi",
+            fullKavitha: "Poddune velugu laanti maatallo jeevitham ki kottha sneham. Mabbullo kuda kanipinche velugu laaga manchi alochanalu manasuni prakaashistayi. Oka sari navvite prapancham motham kotha rangullo merustundi.",
             likes: 512,
             category: "Patriotic"
         ),
         .init(
             title: "Varsham Paata",
-            preview: "Gaalilo paata, varshamlo maataki artham kanipinche samayam...",
+            author: "Venkata Subbaiah",
+            fullKavitha: "Gaalilo paata, varshamlo maataki artham kanipinche samayam idi. Meghalu padina prathi chota bhoomi kotha gundello palukuthundi. Ee raatri tholakari paata lo prematho kalisina jnapakalu unnayi.",
             likes: 189,
             category: "Seasons"
         ),
         .init(
             title: "Prema Kadha",
-            preview: "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu...",
+            author: "Lakshmi Prasad",
+            fullKavitha: "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu. Oka chinna choopu lo pedda prapancham untundi. Kalisi navvina kshanalu kalam daggara nilichipoye gnapakalu avuthayi.",
             likes: 678,
             category: "Love"
         )
     ]
+}
+
+@available(iOS 16.0, *)
+private struct KavithaDetailView: View {
+    let item: KavithaItem
+
+    private var readingMinutes: Int {
+        max(1, (item.fullKavitha.split(separator: " ").count + 119) / 120)
+    }
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                ZStack {
+                    LinearGradient(
+                        colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+
+                    Image(systemName: item.style.symbol)
+                        .font(.system(size: 42, weight: .bold))
+                        .foregroundColor(.white.opacity(0.95))
+                }
+                .frame(height: 180)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+
+                Text(item.title)
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundColor(Color(hex: "#1E2A39"))
+
+                Text("By \(item.author)")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(Color(hex: "#5B8FCB"))
+
+                HStack(spacing: 10) {
+                    Label("\(item.likes)", systemImage: "heart.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color(hex: "#E56B7A"))
+
+                    Text(item.category)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(hex: "#66A7DF"))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color(hex: "#E8F2FC"))
+                        .clipShape(Capsule())
+
+                    Text("\(readingMinutes) min read")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(hex: "#728096"))
+                }
+
+                Text(item.fullKavitha)
+                    .font(.system(size: 17))
+                    .foregroundColor(Color(hex: "#334155"))
+                    .lineSpacing(6)
+            }
+            .padding(16)
+        }
+        .background(AppColors.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private extension KavithaItem {
+    var kavithaPreview: String {
+        let trimmed = fullKavitha.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let firstSentence = trimmed.split(separator: ".").first, !firstSentence.isEmpty {
+            return firstSentence + "..."
+        }
+        let limit = 78
+        if trimmed.count > limit {
+            let end = trimmed.index(trimmed.startIndex, offsetBy: limit)
+            return String(trimmed[..<end]) + "..."
+        }
+        return trimmed
+    }
 }
 
 #Preview {
