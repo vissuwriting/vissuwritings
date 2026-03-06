@@ -11,9 +11,15 @@ import Combine
 
 @available(iOS 16.0, *)
 struct SongsView: View {
+    private enum SongsSegment: String, CaseIterable {
+        case listen
+        case read
+    }
+
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     @StateObject private var player = SongsPlayerController()
     @State private var songs: [SongItem] = []
+    @State private var selectedSegment: SongsSegment = .listen
 
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguage)
@@ -24,6 +30,9 @@ struct SongsView: View {
         return songs[index].title(for: language)
     }
 
+    private var listenTitle: String { language == .telugu ? "విని పాటలు" : "Listen Songs" }
+    private var readTitle: String { language == .telugu ? "చదివే పాటలు" : "Read Songs" }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -32,40 +41,106 @@ struct SongsView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: AppConstants.Songs.listSpacing) {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(AppConstants.Songs.sectionTitle(language))
-                                .font(.system(size: 23, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(hex: "#1D2430"))
-                                .padding(.top, 6)
-
-                            ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
-                                songRow(song: song, index: index)
-                            }
+                        Picker("", selection: $selectedSegment) {
+                            Text(listenTitle).tag(SongsSegment.listen)
+                            Text(readTitle).tag(SongsSegment.read)
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 10)
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
-                        )
+                        .pickerStyle(.segmented)
+                        .padding(.top, 6)
+
+                        if selectedSegment == .listen {
+                            listenSection
+                        } else {
+                            readSection
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 12)
                     .padding(.bottom, 124)
                 }
             }
+            .navigationDestination(for: SongItem.self) { song in
+                SongLyricsDetailView(song: song, language: language)
+            }
         }
         .safeAreaInset(edge: .bottom) {
-            playbackControls
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-                .background(Color.clear)
+            if selectedSegment == .listen {
+                playbackControls
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+            }
         }
         .onAppear {
             songs = SongItem.loadFromBundle(named: AppConstants.Songs.jsonFileName)
         }
+        .onChange(of: selectedSegment) { segment in
+            if segment == .read {
+                player.stop()
+            }
+        }
+    }
+
+    private var listenSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(AppConstants.Songs.sectionTitle(language))
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .foregroundColor(Color(hex: "#1D2430"))
+                .padding(.top, 6)
+
+            ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
+                songRow(song: song, index: index)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
+        )
+    }
+
+    private var readSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(language == .telugu ? "పాటల పదాలు" : "Song Lyrics")
+                .font(.system(size: 23, weight: .bold, design: .rounded))
+                .foregroundColor(Color(hex: "#1D2430"))
+                .padding(.top, 6)
+
+            ForEach(songs) { song in
+                NavigationLink(value: song) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(song.title(for: language))
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(hex: "#1D2430"))
+
+                        Text(song.lyricsText(for: language))
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
+                            .lineSpacing(4)
+                            .lineLimit(2)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
+        )
     }
 
     private func songRow(song: SongItem, index: Int) -> some View {
@@ -77,7 +152,7 @@ struct SongsView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(song.title(for: language))
-                    .font(.system(size: 21, weight: .semibold, design: .rounded))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(hex: "#1D2430"))
                     .lineLimit(1)
 
@@ -89,11 +164,9 @@ struct SongsView: View {
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(song.duration)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
-            }
+            Text(song.duration)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
 
             Button {
                 player.toggleSong(at: index, songs: songs)
@@ -104,9 +177,7 @@ struct SongsView: View {
                     .frame(width: 36, height: 36)
                     .background(Color.white)
                     .clipShape(Circle())
-                    .overlay(
-                        Circle().stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
-                    )
+                    .overlay(Circle().stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1))
             }
             .buttonStyle(.plain)
         }
@@ -311,7 +382,6 @@ private final class SongsPlayerController: ObservableObject {
             self?.playNext(songs: songs)
         }
 
-        // Keep each song as a 10-second preview for smoother UX.
         timeObserver = newPlayer.addPeriodicTimeObserver(
             forInterval: CMTime(seconds: 0.25, preferredTimescale: 600),
             queue: .main
@@ -343,6 +413,8 @@ private struct SongItem: Identifiable, Decodable, Hashable {
     let titleTelugu: String?
     let genre: String
     let genreTelugu: String?
+    let lyrics: String?
+    let lyricsTelugu: String?
     let duration: String
     let imageURL: String
     let audioURL: String
@@ -360,6 +432,12 @@ private struct SongItem: Identifiable, Decodable, Hashable {
     func meta(for language: AppLanguage) -> String {
         genre(for: language)
     }
+
+    func lyricsText(for language: AppLanguage) -> String {
+        if language == .telugu, let lyricsTelugu, !lyricsTelugu.isEmpty { return lyricsTelugu }
+        if let lyrics, !lyrics.isEmpty { return lyrics }
+        return language == .telugu ? "ఈ పాటకు పదాలు త్వరలో చేరుస్తాం." : "Lyrics will be updated soon for this song."
+    }
 }
 
 private extension SongItem {
@@ -372,6 +450,35 @@ private extension SongItem {
             return []
         }
         return items
+    }
+}
+
+@available(iOS 16.0, *)
+private struct SongLyricsDetailView: View {
+    let song: SongItem
+    let language: AppLanguage
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 12) {
+                SongRowArt(urlString: song.imageURL)
+                    .frame(height: 210)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+
+                Text(song.title(for: language))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(hex: "#1D2430"))
+
+                Text(song.lyricsText(for: language))
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
+                    .lineSpacing(6)
+            }
+            .padding(16)
+        }
+        .background(AppColors.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
