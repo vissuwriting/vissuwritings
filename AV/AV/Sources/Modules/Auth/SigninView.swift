@@ -60,39 +60,37 @@ extension SigninView {
     
     var brandHeader: some View {
         VStack(spacing: AppConstants.Brand.contentSpacing) {
-            ZStack {
-                Circle()
-                    .fill(AppConstants.Brand.iconBackgroundColor)
-                    .frame(
-                        width: AppConstants.Brand.iconCircleSize,
-                        height: AppConstants.Brand.iconCircleSize
-                    )
-
-                Image(systemName: AppConstants.Brand.headerIcon)
-                    .font(.system(size: AppConstants.Brand.headerIconSize, weight: .semibold))
-                    .foregroundColor(AppConstants.Brand.iconColor)
-            }
-
             VStack(spacing: AppConstants.Brand.titleSpacing) {
-            Text(AppConstants.Brand.primaryTitle)
-                .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [
-                            AppConstants.Brand.primaryTextColor,
-                            AppConstants.Brand.secondaryTextColor
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                HStack(spacing: 8) {
+                    Text(AppConstants.Brand.primaryTitle)
+                        .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [
+                                    AppConstants.Brand.primaryTextColor,
+                                    AppConstants.Brand.secondaryTextColor
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
 
-            Text(AppConstants.Brand.secondaryTitle)
-                .font(.system(size: AppConstants.Brand.secondaryFontSize, weight: .semibold, design: .serif))
-                .italic()
-                .kerning(AppConstants.Brand.secondaryKerning)
-                .foregroundColor(AppConstants.Brand.secondaryTextColor)
-                .offset(x: AppConstants.Brand.secondaryOffsetX)
+                    Image(systemName: AppConstants.Brand.headerIcon)
+                        .font(.system(size: AppConstants.Brand.headerIconSize, weight: .semibold))
+                        .foregroundColor(AppConstants.Brand.iconColor)
+                        .padding(8)
+                        .background(
+                            Circle()
+                                .fill(AppConstants.Brand.iconBackgroundColor)
+                        )
+                }
+
+                Text(AppConstants.Brand.secondaryTitle)
+                    .font(.system(size: AppConstants.Brand.secondaryFontSize, weight: .semibold, design: .serif))
+                    .italic()
+                    .kerning(AppConstants.Brand.secondaryKerning)
+                    .foregroundColor(AppConstants.Brand.secondaryTextColor)
+                    .offset(x: AppConstants.Brand.secondaryOffsetX)
             }
 
             Image(systemName: AppConstants.Brand.accentIcon)

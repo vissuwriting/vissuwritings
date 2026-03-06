@@ -11,8 +11,8 @@ enum AppConstants {
     enum Brand {
         static let primaryTitle = "Vissu"
         static let secondaryTitle = "Sahithi"
-        static let headerIcon = "book.closed.fill"
-        static let accentIcon = "sparkles"
+        static let headerIcon = "pencil.and.scribble"
+        static let accentIcon = "scribble"
 
         static let topPadding: CGFloat = 56
         static let titleSpacing: CGFloat = -8
