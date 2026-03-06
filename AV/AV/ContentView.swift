@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var email: String = "demo@email.com"
+    @State private var email: String = ""
     @State private var password: String = ""
     @State private var remember: Bool = false
     
@@ -17,7 +17,7 @@ struct ContentView: View {
         
         ZStack(alignment: .top) {
 
-            Color(red: 0.94, green: 0.42, blue: 0.40)
+            Color(red: 0.94, green: 0.42, blue: 0.40).opacity(0.8)
                 .ignoresSafeArea()
 
             IconPatternView()
@@ -48,28 +48,23 @@ extension ContentView {
             // Email
             VStack(alignment: .leading, spacing: 6) {
                 
-                Text("Email")
-                    .foregroundColor(.gray)
                 
-                TextField("", text: $email)
+                TextField("Enter your Name", text: $email)
                     .foregroundColor(.blue)
                 
                 Rectangle()
                     .fill(Color.red)
-                    .frame(height: 1)
+                    .frame(height: 0.5)
             }
             
             // Password
             VStack(alignment: .leading, spacing: 6) {
                 
-                Text("Password")
-                    .foregroundColor(.gray)
-                
                 SecureField("enter your password", text: $password)
                 
                 Rectangle()
                     .fill(Color.red)
-                    .frame(height: 1)
+                    .frame(height: 0.5)
             }
             
             // Remember + Forgot
@@ -77,18 +72,7 @@ extension ContentView {
                 
                 Button {
                     remember.toggle()
-                } label: {
-                    
-                    HStack(spacing: 6) {
-                        
-                        Image(systemName: remember ? "checkmark.square.fill" : "square")
-                            .foregroundColor(.red)
-                        
-                        Text("Remember Me")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 14))
-                    }
-                }
+                } label: { }
                 
                 Spacer()
                 
@@ -123,7 +107,7 @@ extension ContentView {
                 
                 Spacer()
             }
-            .padding(.top, 30)
+            .padding(.top, 10)
             
             Spacer()
         }
