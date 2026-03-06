@@ -28,16 +28,17 @@ struct SignupView: View {
         
         ZStack(alignment: .top) {
             
-            Color(red: 0.94, green: 0.42, blue: 0.40).opacity(0.8)
+            AppConstants.Signup.backgroundColor
+                .opacity(AppConstants.Signup.backgroundOpacity)
                 .ignoresSafeArea()
             
             IconPatternView()
-                .opacity(0.10)
+                .opacity(AppConstants.Signup.patternOpacity)
                 .ignoresSafeArea()
             
-            VStack(spacing: 0) {
+            VStack(spacing: AppConstants.Signup.rootStackSpacing) {
                 
-                Spacer().frame(height: 220)
+                Spacer().frame(height: AppConstants.Signup.topSpacerHeight)
                 
                 WaveShape()
                     .fill(Color.white)
@@ -56,16 +57,16 @@ extension SignupView {
     
     var formSection: some View {
         
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: AppConstants.Signup.titleSpacing) {
             
-            Text("Sign Up")
-                .font(.system(size: 32, weight: .bold))
+            Text(AppConstants.Signup.title)
+                .font(.system(size: AppConstants.Signup.headerFontSize, weight: .bold))
             
             
             /// Name
             capsuleField(
-                icon: "person",
-                placeholder: "Enter your Name",
+                icon: AppConstants.Signup.nameIcon,
+                placeholder: AppConstants.Signup.namePlaceholder,
                 text: $name
             )
             .focused($focusedField, equals: .name)
@@ -73,8 +74,8 @@ extension SignupView {
             
             /// Email
             capsuleField(
-                icon: "envelope",
-                placeholder: "Enter your Email",
+                icon: AppConstants.Signup.emailIcon,
+                placeholder: AppConstants.Signup.emailPlaceholder,
                 text: $email
             )
             .focused($focusedField, equals: .email)
@@ -82,8 +83,8 @@ extension SignupView {
             
             /// Password
             secureCapsuleField(
-                icon: "lock",
-                placeholder: "Enter Password",
+                icon: AppConstants.Signup.passwordIcon,
+                placeholder: AppConstants.Signup.passwordPlaceholder,
                 text: $password
             )
             .focused($focusedField, equals: .password)
@@ -91,8 +92,8 @@ extension SignupView {
             
             /// Confirm Password
             secureCapsuleField(
-                icon: "lock.fill",
-                placeholder: "Confirm Password",
+                icon: AppConstants.Signup.confirmPasswordIcon,
+                placeholder: AppConstants.Signup.confirmPasswordPlaceholder,
                 text: $confirmPassword
             )
             .focused($focusedField, equals: .confirmPassword)
@@ -101,22 +102,22 @@ extension SignupView {
             /// Signup Button
             Button {
                 dismissKeyboard()
-                print("Signup tapped")
+                print(AppConstants.Signup.signupTappedLog)
             } label: {
                 
-                Text("Create Account")
+                Text(AppConstants.Signup.createAccountTitle)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
                         formValid
-                        ? Color(red: 0.94, green: 0.42, blue: 0.40)
-                        : Color(red: 0.94, green: 0.42, blue: 0.40).opacity(0.3)
+                        ? AppConstants.Signup.backgroundColor
+                        : AppConstants.Signup.backgroundColor.opacity(AppConstants.Signup.disabledButtonOpacity)
                     )
-                    .cornerRadius(14)
+                    .cornerRadius(AppConstants.Signup.buttonCornerRadius)
             }
             .disabled(!formValid)
-            .padding(.top, 5)
+            .padding(.top, AppConstants.Signup.buttonTopPadding)
             
             
             /// Bottom Login Text
@@ -124,11 +125,11 @@ extension SignupView {
                 
                 Spacer()
                 
-                Text("Already have an account?")
-                    .foregroundColor(.gray)
+                Text(AppConstants.Signup.alreadyHaveAccountTitle)
+                    .foregroundColor(AppConstants.Signup.bottomTextColor)
                 
-                Text("Sign in")
-                    .foregroundColor(.red)
+                Text(AppConstants.Signup.signInTitle)
+                    .foregroundColor(AppConstants.Signup.backgroundColor)
                     .fontWeight(.semibold)
                     .onTapGesture {
                         dismiss()
@@ -136,12 +137,12 @@ extension SignupView {
                 
                 Spacer()
             }
-            .padding(.top, 10)
+            .padding(.top, AppConstants.Signup.bottomSectionTopPadding)
             
             Spacer()
         }
-        .padding(.horizontal, 35)
-        .padding(.top, 70)
+        .padding(.horizontal, AppConstants.Signup.formHorizontalPadding)
+        .padding(.top, AppConstants.Signup.formTopPadding)
     }
 }
 
@@ -167,7 +168,7 @@ extension SignupView {
         HStack {
             
             Image(systemName: icon)
-                .foregroundColor(.gray)
+                .foregroundColor(AppConstants.Signup.textFieldIconColor)
             
             TextField(placeholder, text: text)
                 .autocapitalization(.none)
@@ -178,7 +179,10 @@ extension SignupView {
         )
         .overlay(
             Capsule()
-                .stroke(Color.red.opacity(0.7), lineWidth: 1)
+                .stroke(
+                    AppConstants.Signup.fieldBorderColor.opacity(AppConstants.Signup.fieldBorderOpacity),
+                    lineWidth: AppConstants.Signup.fieldBorderLineWidth
+                )
         )
     }
     
@@ -188,7 +192,7 @@ extension SignupView {
         HStack {
             
             Image(systemName: icon)
-                .foregroundColor(.gray)
+                .foregroundColor(AppConstants.Signup.textFieldIconColor)
             
             SecureField(placeholder, text: text)
         }
@@ -198,7 +202,10 @@ extension SignupView {
         )
         .overlay(
             Capsule()
-                .stroke(Color.red.opacity(0.7), lineWidth: 1)
+                .stroke(
+                    AppConstants.Signup.fieldBorderColor.opacity(AppConstants.Signup.fieldBorderOpacity),
+                    lineWidth: AppConstants.Signup.fieldBorderLineWidth
+                )
         )
     }
 }

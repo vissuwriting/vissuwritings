@@ -17,7 +17,7 @@ struct AVApp: App {
         WindowGroup {
             
             if isLoggedIn {
-                TabsView()
+                DashboardView()
             } else {
                 SigninView(isLoggedIn: $isLoggedIn)
             }

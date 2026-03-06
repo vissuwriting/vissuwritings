@@ -29,18 +29,19 @@ struct SigninView: View {
             
             ZStack(alignment: .top) {
 
-                Color(red: 0.94, green: 0.42, blue: 0.40).opacity(0.8)
+                AppConstants.Signin.backgroundColor
+                    .opacity(AppConstants.Signin.backgroundOpacity)
                     .ignoresSafeArea()
 
                 IconPatternView()
-                    .opacity(0.10)
+                    .opacity(AppConstants.Signin.patternOpacity)
                     .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    Spacer().frame(height: 240)
+                VStack(spacing: AppConstants.Signin.rootStackSpacing) {
+                    Spacer().frame(height: AppConstants.Signin.topSpacerHeight)
 
                     WaveShape()
-                        .fill(Color.white)
+                        .fill(AppConstants.Signin.waveFillColor)
                         .ignoresSafeArea()
                         .overlay(formSection)
                 }
@@ -57,19 +58,19 @@ extension SigninView {
     
     var formSection: some View {
         
-        VStack(alignment: .leading, spacing: 25) {
+        VStack(alignment: .leading, spacing: AppConstants.Signin.formSpacing) {
             
-            Text("Sign in")
-                .font(.system(size: 32, weight: .bold))
+            Text(AppConstants.Signin.title)
+                .font(.system(size: AppConstants.Signin.headerFontSize, weight: .bold))
             
             
             /// Email Field
             HStack {
                 
-                Image(systemName: "person")
-                    .foregroundColor(.gray)
+                Image(systemName: AppConstants.Signin.emailIcon)
+                    .foregroundColor(AppConstants.Signin.textFieldIconColor)
                 
-                TextField("Enter your Name", text: $email)
+                TextField(AppConstants.Signin.emailPlaceholder, text: $email)
                     .autocapitalization(.none)
                     .focused($focusedField, equals: .email)
                     .submitLabel(.next)
@@ -80,21 +81,24 @@ extension SigninView {
             .padding()
             .background(
                 Capsule()
-                    .fill(Color.white)
+                    .fill(AppConstants.Signin.fieldBackgroundColor)
             )
             .overlay(
                 Capsule()
-                    .stroke(Color.red.opacity(0.7), lineWidth: 1)
+                    .stroke(
+                        AppConstants.Signin.fieldBorderColor.opacity(AppConstants.Signin.fieldBorderOpacity),
+                        lineWidth: AppConstants.Signin.fieldBorderLineWidth
+                    )
             )
             
             
             /// Password Field
             HStack {
                 
-                Image(systemName: "lock")
-                    .foregroundColor(.gray)
+                Image(systemName: AppConstants.Signin.passwordIcon)
+                    .foregroundColor(AppConstants.Signin.textFieldIconColor)
                 
-                SecureField("Enter your password", text: $password)
+                SecureField(AppConstants.Signin.passwordPlaceholder, text: $password)
                     .focused($focusedField, equals: .password)
                     .submitLabel(.done)
                     .onSubmit {
@@ -104,11 +108,14 @@ extension SigninView {
             .padding()
             .background(
                 Capsule()
-                    .fill(Color.white)
+                    .fill(AppConstants.Signin.fieldBackgroundColor)
             )
             .overlay(
                 Capsule()
-                    .stroke(Color.red.opacity(0.7), lineWidth: 1)
+                    .stroke(
+                        AppConstants.Signin.fieldBorderColor.opacity(AppConstants.Signin.fieldBorderOpacity),
+                        lineWidth: AppConstants.Signin.fieldBorderLineWidth
+                    )
             )
             
             
@@ -118,9 +125,9 @@ extension SigninView {
                 HStack {
                     Spacer()
                     
-                    Text("Forgot Password?")
-                        .foregroundColor(.red)
-                        .font(.system(size: 14))
+                    Text(AppConstants.Signin.forgotPasswordTitle)
+                        .foregroundColor(AppConstants.Signin.accentColor)
+                        .font(.system(size: AppConstants.Signin.forgotPasswordFontSize))
                 }
                 .transition(.opacity)
             }
@@ -133,19 +140,19 @@ extension SigninView {
                 
             } label: {
                 
-                Text("Login")
-                    .foregroundColor(.white)
+                Text(AppConstants.Signin.loginTitle)
+                    .foregroundColor(AppConstants.Signin.foregroundOnAccentColor)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
                         (email.isEmpty || password.isEmpty)
-                        ? Color(red: 0.94, green: 0.42, blue: 0.40).opacity(0.3)
-                        : Color(red: 0.94, green: 0.42, blue: 0.40)
+                        ? AppConstants.Signin.backgroundColor.opacity(AppConstants.Signin.disabledButtonOpacity)
+                        : AppConstants.Signin.backgroundColor
                     )
-                    .cornerRadius(14)
+                    .cornerRadius(AppConstants.Signin.buttonCornerRadius)
             }
             .disabled(email.isEmpty || password.isEmpty)
-            .padding(.top, -5)
+            .padding(.top, AppConstants.Signin.buttonTopPadding)
             
             
             /// Bottom Text
@@ -153,23 +160,23 @@ extension SigninView {
             HStack {
                 Spacer()
                 
-                Text("Don't have an Account?")
-                    .foregroundColor(.gray)
+                Text(AppConstants.Signin.noAccountTitle)
+                    .foregroundColor(AppConstants.Signin.bottomTextColor)
                 
                 NavigationLink(destination: SignupView()) {
-                    Text("Sign up")
-                        .foregroundColor(.red)
+                    Text(AppConstants.Signin.signUpTitle)
+                        .foregroundColor(AppConstants.Signin.accentColor)
                         .fontWeight(.semibold)
                 }
                 
                 Spacer()
             }
-            .padding(.top, 5)
+            .padding(.top, AppConstants.Signin.bottomSectionTopPadding)
             
             Spacer()
         }
-        .padding(.horizontal, 35)
-        .padding(.top, 80)
+        .padding(.horizontal, AppConstants.Signin.formHorizontalPadding)
+        .padding(.top, AppConstants.Signin.formTopPadding)
     }
 }
 
@@ -218,38 +225,34 @@ struct WaveShape: Shape {
 
 struct IconPatternView: View {
     
-    let icons = [
-        "book.closed",
-        "pencil",
-        "music.note",
-        "doc.text",
-        "mic",
-        "quote.bubble",
-        "note.text"
-    ]
-    
-    let columns = 5
-    let rows = 6
-    
     var body: some View {
         
         GeometryReader { geo in
             
-            let cellWidth = geo.size.width / CGFloat(columns)
-            let cellHeight: CGFloat = 90
+            let cellWidth = geo.size.width / CGFloat(AppConstants.IconPattern.columns)
             
             ZStack {
                 
-                ForEach(0..<rows, id: \.self) { row in
-                    ForEach(0..<columns, id: \.self) { col in
+                ForEach(0..<AppConstants.IconPattern.rows, id: \.self) { row in
+                    ForEach(0..<AppConstants.IconPattern.columns, id: \.self) { col in
                         
-                        Image(systemName: icons[(row + col) % icons.count])
-                            .font(.system(size: 42))
-                            .foregroundColor(.white.opacity(0.95))
-                            .rotationEffect(.degrees(Double.random(in: -20...20)))
+                        Image(
+                            systemName: AppConstants.IconPattern.icons[
+                                (row + col) % AppConstants.IconPattern.icons.count
+                            ]
+                        )
+                            .font(.system(size: AppConstants.IconPattern.iconFontSize))
+                            .foregroundColor(.white.opacity(AppConstants.IconPattern.iconForegroundOpacity))
+                            .rotationEffect(
+                                .degrees(
+                                    Double.random(
+                                        in: AppConstants.IconPattern.rotationMin...AppConstants.IconPattern.rotationMax
+                                    )
+                                )
+                            )
                             .position(
                                 x: cellWidth * CGFloat(col) + cellWidth / 2,
-                                y: cellHeight * CGFloat(row) + 40
+                                y: AppConstants.IconPattern.cellHeight * CGFloat(row) + AppConstants.IconPattern.verticalOffset
                             )
                     }
                 }
@@ -261,12 +264,12 @@ struct IconPatternView: View {
 
 
 @available(iOS 16.0, *)
-struct DashboardView: View {
+struct Adminview: View {
     
     var body: some View {
         NavigationStack {
-            Text("Home Screen")
-                .font(.largeTitle)
+            Text(AppConstants.Dashboard.homeTitle)
+                .font(AppConstants.Dashboard.homeTitleFont)
         }
     }
 }
