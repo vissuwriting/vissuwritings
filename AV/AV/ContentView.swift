@@ -45,43 +45,55 @@ extension ContentView {
             Text("Sign in")
                 .font(.system(size: 32, weight: .bold))
             
-            // Email
-            VStack(alignment: .leading, spacing: 6) {
-                
-                
-                TextField("Enter your Name", text: $email)
-                    .foregroundColor(.blue)
-                
-                Rectangle()
-                    .fill(Color.red)
-                    .frame(height: 0.5)
-            }
-            
-            // Password
-            VStack(alignment: .leading, spacing: 6) {
-                
-                SecureField("enter your password", text: $password)
-                
-                Rectangle()
-                    .fill(Color.red)
-                    .frame(height: 0.5)
-            }
-            
-            // Remember + Forgot
+            /// Email Field
             HStack {
                 
-                Button {
-                    remember.toggle()
-                } label: { }
+                Image(systemName: "person")
+                    .foregroundColor(.gray)
                 
-                Spacer()
+                TextField("Enter your Name", text: $email)
+                    .autocapitalization(.none)
+            }
+            .padding()
+            .background(
+                Capsule()
+                    .fill(Color.white)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color.red.opacity(0.7), lineWidth: 1)
+            )
+            
+            
+            /// Password Field
+            HStack {
                 
+                Image(systemName: "lock")
+                    .foregroundColor(.gray)
+                
+                SecureField("Enter your password", text: $password)
+            }
+            .padding()
+            .background(
+                Capsule()
+                    .fill(Color.white)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color.red.opacity(0.7), lineWidth: 1)
+            )
+            
+            
+            /// Remember + Forgot
+            HStack {
+            Spacer()
                 Text("Forgot Password?")
                     .foregroundColor(.red)
                     .font(.system(size: 14))
             }
             
-            // Login Button
+            
+            /// Login Button
             Button {
                 
             } label: {
@@ -93,9 +105,10 @@ extension ContentView {
                     .background(Color(red: 0.94, green: 0.42, blue: 0.40))
                     .cornerRadius(14)
             }
-            .padding(.top, 10)
+            .padding(.top, -5)
             
-            // Bottom Text
+            
+            /// Bottom Text
             HStack {
                 Spacer()
                 
@@ -107,12 +120,12 @@ extension ContentView {
                 
                 Spacer()
             }
-            .padding(.top, 10)
+            .padding(.top, 5)
             
             Spacer()
         }
         .padding(.horizontal, 35)
-        .padding(.top, 70)
+        .padding(.top, 80)
     }
 }
 
