@@ -10,9 +10,17 @@ import SwiftUI
 @available(iOS 16.0, *)
 @main
 struct AVApp: App {
+    
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            
+            if isLoggedIn {
+                TabsView()
+            } else {
+                SigninView(isLoggedIn: $isLoggedIn)
+            }
         }
     }
 }
