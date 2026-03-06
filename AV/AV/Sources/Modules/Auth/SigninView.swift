@@ -58,125 +58,127 @@ extension SigninView {
     
     var formSection: some View {
         
-        VStack(alignment: .leading, spacing: AppConstants.Signin.formSpacing) {
-            
-            Text(AppConstants.Signin.title)
-                .font(.system(size: AppConstants.Signin.headerFontSize, weight: .bold))
-            
-            
-            /// Email Field
-            HStack {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: AppConstants.Signin.formSpacing) {
                 
-                Image(systemName: AppConstants.Signin.emailIcon)
-                    .foregroundColor(AppConstants.Signin.textFieldIconColor)
+                Text(AppConstants.Signin.title)
+                    .font(.system(size: AppConstants.Signin.headerFontSize, weight: .bold))
                 
-                TextField(AppConstants.Signin.emailPlaceholder, text: $email)
-                    .autocapitalization(.none)
-                    .focused($focusedField, equals: .email)
-                    .submitLabel(.next)
-                    .onSubmit {
-                        focusedField = .password
+                
+                /// Email Field
+                HStack {
+                    
+                    Image(systemName: AppConstants.Signin.emailIcon)
+                        .foregroundColor(AppConstants.Signin.textFieldIconColor)
+                    
+                    TextField(AppConstants.Signin.emailPlaceholder, text: $email)
+                        .autocapitalization(.none)
+                        .focused($focusedField, equals: .email)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .password
+                        }
+                }
+                .padding()
+                .background(
+                    Capsule()
+                        .fill(AppConstants.Signin.fieldBackgroundColor)
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(
+                            AppConstants.Signin.fieldBorderColor.opacity(AppConstants.Signin.fieldBorderOpacity),
+                            lineWidth: AppConstants.Signin.fieldBorderLineWidth
+                        )
+                )
+                
+                
+                /// Password Field
+                HStack {
+                    
+                    Image(systemName: AppConstants.Signin.passwordIcon)
+                        .foregroundColor(AppConstants.Signin.textFieldIconColor)
+                    
+                    SecureField(AppConstants.Signin.passwordPlaceholder, text: $password)
+                        .focused($focusedField, equals: .password)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            dismissKeyboard()
+                        }
+                }
+                .padding()
+                .background(
+                    Capsule()
+                        .fill(AppConstants.Signin.fieldBackgroundColor)
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(
+                            AppConstants.Signin.fieldBorderColor.opacity(AppConstants.Signin.fieldBorderOpacity),
+                            lineWidth: AppConstants.Signin.fieldBorderLineWidth
+                        )
+                )
+                
+                
+                /// Forgot Password (Only when typing password)
+                if focusedField == .password {
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Text(AppConstants.Signin.forgotPasswordTitle)
+                            .foregroundColor(AppConstants.Signin.accentColor)
+                            .font(.system(size: AppConstants.Signin.forgotPasswordFontSize))
                     }
-            }
-            .padding()
-            .background(
-                Capsule()
-                    .fill(AppConstants.Signin.fieldBackgroundColor)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(
-                        AppConstants.Signin.fieldBorderColor.opacity(AppConstants.Signin.fieldBorderOpacity),
-                        lineWidth: AppConstants.Signin.fieldBorderLineWidth
-                    )
-            )
-            
-            
-            /// Password Field
-            HStack {
+                    .transition(.opacity)
+                }
                 
-                Image(systemName: AppConstants.Signin.passwordIcon)
-                    .foregroundColor(AppConstants.Signin.textFieldIconColor)
                 
-                SecureField(AppConstants.Signin.passwordPlaceholder, text: $password)
-                    .focused($focusedField, equals: .password)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        dismissKeyboard()
-                    }
-            }
-            .padding()
-            .background(
-                Capsule()
-                    .fill(AppConstants.Signin.fieldBackgroundColor)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(
-                        AppConstants.Signin.fieldBorderColor.opacity(AppConstants.Signin.fieldBorderOpacity),
-                        lineWidth: AppConstants.Signin.fieldBorderLineWidth
-                    )
-            )
-            
-            
-            /// Forgot Password (Only when typing password)
-            if focusedField == .password {
+                Button {
+                    dismissKeyboard()
+                    
+                    isLoggedIn = true
+                    
+                } label: {
+                    
+                    Text(AppConstants.Signin.loginTitle)
+                        .foregroundColor(AppConstants.Signin.foregroundOnAccentColor)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            (email.isEmpty || password.isEmpty)
+                            ? AppConstants.Signin.backgroundColor.opacity(AppConstants.Signin.disabledButtonOpacity)
+                            : AppConstants.Signin.backgroundColor
+                        )
+                        .cornerRadius(AppConstants.Signin.buttonCornerRadius)
+                }
+                .disabled(email.isEmpty || password.isEmpty)
+                .padding(.top, AppConstants.Signin.buttonTopPadding)
                 
+                
+                /// Bottom Text
+                /// Bottom Text
                 HStack {
                     Spacer()
                     
-                    Text(AppConstants.Signin.forgotPasswordTitle)
-                        .foregroundColor(AppConstants.Signin.accentColor)
-                        .font(.system(size: AppConstants.Signin.forgotPasswordFontSize))
+                    Text(AppConstants.Signin.noAccountTitle)
+                        .foregroundColor(AppConstants.Signin.bottomTextColor)
+                    
+                    NavigationLink(destination: SignupView()) {
+                        Text(AppConstants.Signin.signUpTitle)
+                            .foregroundColor(AppConstants.Signin.accentColor)
+                            .fontWeight(.semibold)
+                    }
+                    
+                    Spacer()
                 }
-                .transition(.opacity)
+                .padding(.top, AppConstants.Signin.bottomSectionTopPadding)
             }
-            
-            
-            Button {
-                dismissKeyboard()
-                
-                isLoggedIn = true
-                
-            } label: {
-                
-                Text(AppConstants.Signin.loginTitle)
-                    .foregroundColor(AppConstants.Signin.foregroundOnAccentColor)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        (email.isEmpty || password.isEmpty)
-                        ? AppConstants.Signin.backgroundColor.opacity(AppConstants.Signin.disabledButtonOpacity)
-                        : AppConstants.Signin.backgroundColor
-                    )
-                    .cornerRadius(AppConstants.Signin.buttonCornerRadius)
-            }
-            .disabled(email.isEmpty || password.isEmpty)
-            .padding(.top, AppConstants.Signin.buttonTopPadding)
-            
-            
-            /// Bottom Text
-            /// Bottom Text
-            HStack {
-                Spacer()
-                
-                Text(AppConstants.Signin.noAccountTitle)
-                    .foregroundColor(AppConstants.Signin.bottomTextColor)
-                
-                NavigationLink(destination: SignupView()) {
-                    Text(AppConstants.Signin.signUpTitle)
-                        .foregroundColor(AppConstants.Signin.accentColor)
-                        .fontWeight(.semibold)
-                }
-                
-                Spacer()
-            }
-            .padding(.top, AppConstants.Signin.bottomSectionTopPadding)
-            
-            Spacer()
+            .padding(.horizontal, AppConstants.Signin.formHorizontalPadding)
+            .padding(.top, AppConstants.Signin.formTopPadding)
+            .padding(.bottom, AppConstants.Signin.formTopPadding)
         }
-        .padding(.horizontal, AppConstants.Signin.formHorizontalPadding)
-        .padding(.top, AppConstants.Signin.formTopPadding)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 

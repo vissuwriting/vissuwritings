@@ -57,92 +57,94 @@ extension SignupView {
     
     var formSection: some View {
         
-        VStack(alignment: .leading, spacing: AppConstants.Signup.titleSpacing) {
-            
-            Text(AppConstants.Signup.title)
-                .font(.system(size: AppConstants.Signup.headerFontSize, weight: .bold))
-            
-            
-            /// Name
-            capsuleField(
-                icon: AppConstants.Signup.nameIcon,
-                placeholder: AppConstants.Signup.namePlaceholder,
-                text: $name
-            )
-            .focused($focusedField, equals: .name)
-            
-            
-            /// Email
-            capsuleField(
-                icon: AppConstants.Signup.emailIcon,
-                placeholder: AppConstants.Signup.emailPlaceholder,
-                text: $email
-            )
-            .focused($focusedField, equals: .email)
-            
-            
-            /// Password
-            secureCapsuleField(
-                icon: AppConstants.Signup.passwordIcon,
-                placeholder: AppConstants.Signup.passwordPlaceholder,
-                text: $password
-            )
-            .focused($focusedField, equals: .password)
-            
-            
-            /// Confirm Password
-            secureCapsuleField(
-                icon: AppConstants.Signup.confirmPasswordIcon,
-                placeholder: AppConstants.Signup.confirmPasswordPlaceholder,
-                text: $confirmPassword
-            )
-            .focused($focusedField, equals: .confirmPassword)
-            
-            
-            /// Signup Button
-            Button {
-                dismissKeyboard()
-                print(AppConstants.Signup.signupTappedLog)
-            } label: {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: AppConstants.Signup.titleSpacing) {
                 
-                Text(AppConstants.Signup.createAccountTitle)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        formValid
-                        ? AppConstants.Signup.backgroundColor
-                        : AppConstants.Signup.backgroundColor.opacity(AppConstants.Signup.disabledButtonOpacity)
-                    )
-                    .cornerRadius(AppConstants.Signup.buttonCornerRadius)
+                Text(AppConstants.Signup.title)
+                    .font(.system(size: AppConstants.Signup.headerFontSize, weight: .bold))
+                
+                
+                /// Name
+                capsuleField(
+                    icon: AppConstants.Signup.nameIcon,
+                    placeholder: AppConstants.Signup.namePlaceholder,
+                    text: $name
+                )
+                .focused($focusedField, equals: .name)
+                
+                
+                /// Email
+                capsuleField(
+                    icon: AppConstants.Signup.emailIcon,
+                    placeholder: AppConstants.Signup.emailPlaceholder,
+                    text: $email
+                )
+                .focused($focusedField, equals: .email)
+                
+                
+                /// Password
+                secureCapsuleField(
+                    icon: AppConstants.Signup.passwordIcon,
+                    placeholder: AppConstants.Signup.passwordPlaceholder,
+                    text: $password
+                )
+                .focused($focusedField, equals: .password)
+                
+                
+                /// Confirm Password
+                secureCapsuleField(
+                    icon: AppConstants.Signup.confirmPasswordIcon,
+                    placeholder: AppConstants.Signup.confirmPasswordPlaceholder,
+                    text: $confirmPassword
+                )
+                .focused($focusedField, equals: .confirmPassword)
+                
+                
+                /// Signup Button
+                Button {
+                    dismissKeyboard()
+                    print(AppConstants.Signup.signupTappedLog)
+                } label: {
+                    
+                    Text(AppConstants.Signup.createAccountTitle)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            formValid
+                            ? AppConstants.Signup.backgroundColor
+                            : AppConstants.Signup.backgroundColor.opacity(AppConstants.Signup.disabledButtonOpacity)
+                        )
+                        .cornerRadius(AppConstants.Signup.buttonCornerRadius)
+                }
+                .disabled(!formValid)
+                .padding(.top, AppConstants.Signup.buttonTopPadding)
+                
+                
+                /// Bottom Login Text
+                HStack {
+                    
+                    Spacer()
+                    
+                    Text(AppConstants.Signup.alreadyHaveAccountTitle)
+                        .foregroundColor(AppConstants.Signup.bottomTextColor)
+                    
+                    Text(AppConstants.Signup.signInTitle)
+                        .foregroundColor(AppConstants.Signup.backgroundColor)
+                        .fontWeight(.semibold)
+                        .onTapGesture {
+                            dismiss()
+                        }
+                    
+                    Spacer()
+                }
+                .padding(.top, AppConstants.Signup.bottomSectionTopPadding)
             }
-            .disabled(!formValid)
-            .padding(.top, AppConstants.Signup.buttonTopPadding)
-            
-            
-            /// Bottom Login Text
-            HStack {
-                
-                Spacer()
-                
-                Text(AppConstants.Signup.alreadyHaveAccountTitle)
-                    .foregroundColor(AppConstants.Signup.bottomTextColor)
-                
-                Text(AppConstants.Signup.signInTitle)
-                    .foregroundColor(AppConstants.Signup.backgroundColor)
-                    .fontWeight(.semibold)
-                    .onTapGesture {
-                        dismiss()
-                    }
-                
-                Spacer()
-            }
-            .padding(.top, AppConstants.Signup.bottomSectionTopPadding)
-            
-            Spacer()
+            .padding(.horizontal, AppConstants.Signup.formHorizontalPadding)
+            .padding(.top, AppConstants.Signup.formTopPadding)
+            .padding(.bottom, AppConstants.Signup.formTopPadding)
         }
-        .padding(.horizontal, AppConstants.Signup.formHorizontalPadding)
-        .padding(.top, AppConstants.Signup.formTopPadding)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 
