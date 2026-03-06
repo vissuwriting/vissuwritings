@@ -37,6 +37,8 @@ struct SigninView: View {
                     .opacity(AppConstants.Signin.patternOpacity)
                     .ignoresSafeArea()
 
+                brandHeader
+
                 VStack(spacing: AppConstants.Signin.rootStackSpacing) {
                     Spacer().frame(height: AppConstants.Signin.topSpacerHeight)
 
@@ -55,6 +57,57 @@ struct SigninView: View {
 
 @available(iOS 16.0, *)
 extension SigninView {
+    
+    var brandHeader: some View {
+        VStack(spacing: AppConstants.Brand.contentSpacing) {
+            ZStack {
+                Circle()
+                    .fill(AppConstants.Brand.iconBackgroundColor)
+                    .frame(
+                        width: AppConstants.Brand.iconCircleSize,
+                        height: AppConstants.Brand.iconCircleSize
+                    )
+
+                Image(systemName: AppConstants.Brand.headerIcon)
+                    .font(.system(size: AppConstants.Brand.headerIconSize, weight: .semibold))
+                    .foregroundColor(AppConstants.Brand.iconColor)
+            }
+
+            VStack(spacing: AppConstants.Brand.titleSpacing) {
+            Text(AppConstants.Brand.primaryTitle)
+                .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            AppConstants.Brand.primaryTextColor,
+                            AppConstants.Brand.secondaryTextColor
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            Text(AppConstants.Brand.secondaryTitle)
+                .font(.system(size: AppConstants.Brand.secondaryFontSize, weight: .semibold, design: .serif))
+                .italic()
+                .kerning(AppConstants.Brand.secondaryKerning)
+                .foregroundColor(AppConstants.Brand.secondaryTextColor)
+                .offset(x: AppConstants.Brand.secondaryOffsetX)
+            }
+
+            Image(systemName: AppConstants.Brand.accentIcon)
+                .font(.system(size: AppConstants.Brand.accentIconSize, weight: .semibold))
+                .foregroundColor(AppConstants.Brand.secondaryTextColor)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.top, AppConstants.Brand.topPadding)
+        .shadow(
+            color: AppConstants.Brand.shadowColor,
+            radius: AppConstants.Brand.shadowRadius,
+            x: .zero,
+            y: AppConstants.Brand.shadowYOffset
+        )
+    }
     
     var formSection: some View {
         

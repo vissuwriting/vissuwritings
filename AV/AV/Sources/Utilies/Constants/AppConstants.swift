@@ -8,6 +8,33 @@
 import SwiftUI
 
 enum AppConstants {
+    enum Brand {
+        static let primaryTitle = "Vissu"
+        static let secondaryTitle = "Sahithi"
+        static let headerIcon = "book.closed.fill"
+        static let accentIcon = "sparkles"
+
+        static let topPadding: CGFloat = 56
+        static let titleSpacing: CGFloat = -8
+        static let contentSpacing: CGFloat = 10
+        static let primaryFontSize: CGFloat = 32
+        static let secondaryFontSize: CGFloat = 28
+        static let secondaryKerning: CGFloat = 1.6
+        static let secondaryOffsetX: CGFloat = 25
+        static let iconCircleSize: CGFloat = 64
+        static let headerIconSize: CGFloat = 30
+        static let accentIconSize: CGFloat = 13
+
+        static let primaryTextColor = Color.white
+        static let secondaryTextColor = Color.white.opacity(0.94)
+        static let iconBackgroundColor = Color.white.opacity(0.2)
+        static let iconColor = Color.white
+
+        static let shadowColor = Color.black.opacity(0.18)
+        static let shadowRadius: CGFloat = 8
+        static let shadowYOffset: CGFloat = 3
+    }
+
     enum Dashboard {
         static let homeTitle = "Home Screen"
         static let homeTitleFont = Font.largeTitle
