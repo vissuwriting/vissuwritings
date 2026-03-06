@@ -32,8 +32,7 @@ struct StoryView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppColors.background
-                    .ignoresSafeArea()
+                AppColors.background.ignoresSafeArea()
 
                 if filteredStories.isEmpty {
                     emptyStateView

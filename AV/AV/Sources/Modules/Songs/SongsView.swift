@@ -37,8 +37,7 @@ struct SongsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppColors.background
-                    .ignoresSafeArea()
+                AppColors.background.ignoresSafeArea()
 
                 if songs.isEmpty {
                     VStack(spacing: 16) {
@@ -77,7 +76,7 @@ struct SongsView: View {
                 }
             }
             .navigationDestination(for: SongItem.self) { song in
-                SongLyricsDetailView(song: song, language: language)
+                SongLyricsDetailView(song: song, language: language) .tabBarHidden()
             }
         }
         .safeAreaInset(edge: .bottom) {

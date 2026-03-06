@@ -28,8 +28,7 @@ struct KavithaluView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppColors.background
-                    .ignoresSafeArea()
+                AppColors.background.ignoresSafeArea()
 
                 if filteredKavithalu.isEmpty {
                     VStack(spacing: AppConstants.Kavithalu.rootSpacing) {
