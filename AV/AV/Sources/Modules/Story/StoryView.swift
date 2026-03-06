@@ -119,21 +119,10 @@ struct StoryView: View {
                 .frame(height: AppConstants.Story.cardImageHeight)
 
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    Text(AppConstants.Story.categoryLabel(story.category, language))
-                        .font(.system(size: AppConstants.Story.categoryChipSize, weight: .semibold))
-                        .foregroundColor(Color(hex: AppConstants.Story.categoryTextHex))
-                        .padding(.horizontal, AppConstants.Story.chipHorizontalPadding)
-                        .padding(.vertical, AppConstants.Story.chipVerticalPadding)
-                        .background(Color(hex: AppConstants.Story.categoryBgHex))
-                        .clipShape(RoundedRectangle(cornerRadius: AppConstants.Story.chipCornerRadius))
-                }
-                .padding(.top, AppConstants.Story.categoryRowTopPadding)
-
                 Text(story.title(for: language))
                     .font(.system(size: AppConstants.Story.titleSize, weight: .bold, design: .serif))
                     .foregroundColor(Color(hex: AppConstants.Story.titleHex))
-                    .padding(.top, AppConstants.Story.titleTopPadding)
+                    .padding(.top, 8)
 
                 Text(story.summary(for: language))
                     .font(.system(size: AppConstants.Story.summarySize))
@@ -141,7 +130,9 @@ struct StoryView: View {
                     .lineLimit(2)
                     .padding(.top, AppConstants.Story.summaryTopPadding)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(AppConstants.Story.contentPadding)
+            .background(.white)
         }
         .background(Color(hex: AppConstants.Story.cardBackgroundHex))
         .clipShape(RoundedRectangle(cornerRadius: AppConstants.Story.cardCornerRadius))

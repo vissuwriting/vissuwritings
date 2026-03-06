@@ -243,7 +243,7 @@ enum AppConstants {
         static let chipVerticalPadding: CGFloat = 4
         static let categoryChipSize: CGFloat = 12
         static let readTimeSize: CGFloat = 13
-        static let titleSize: CGFloat = 29
+        static let titleSize: CGFloat = 17
         static let detailTitleSize: CGFloat = 32
         static let authorSize: CGFloat = 13
         static let summarySize: CGFloat = 15
