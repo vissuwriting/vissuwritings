@@ -46,7 +46,7 @@ struct KavithaluView: View {
                         } else {
                             ForEach(filteredKavithalu) { item in
                                 NavigationLink {
-                                    KavithaDetailView(item: item)
+                                    KavithaDetailView(item: item) .tabBarHidden()
                                 } label: {
                                     kavithaCard(item)
                                 }
@@ -69,7 +69,7 @@ struct KavithaluView: View {
     private var greetingsView: some View {
         HStack(spacing: AppConstants.Kavithalu.cardContentPadding) {
             NavigationLink {
-                UserProfileView()
+                UserProfileView() .tabBarHidden()
             } label: {
                 ZStack {
                     Circle()
