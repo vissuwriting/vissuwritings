@@ -39,6 +39,7 @@ enum AppLanguage: String, CaseIterable {
 
 enum AppConstants {
     static let languageStorageKey = "selectedLanguage"
+    static let editModeStorageKey = "isEditModeEnabled"
 
     enum Kavithalu {
         static let jsonFileName = "kavithalu"

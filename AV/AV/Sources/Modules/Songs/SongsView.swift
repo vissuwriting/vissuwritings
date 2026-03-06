@@ -17,6 +17,7 @@ struct SongsView: View {
     }
 
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
+    @AppStorage(AppConstants.editModeStorageKey) private var isEditModeEnabled = false
     @StateObject private var player = SongsPlayerController()
     @State private var songs: [SongItem] = []
     @State private var selectedSegment: SongsSegment = .listen
@@ -88,7 +89,15 @@ struct SongsView: View {
                 .padding(.top, 6)
 
             ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
-                songRow(song: song, index: index)
+                ZStack(alignment: .topTrailing) {
+                    songRow(song: song, index: index)
+
+                    if isEditModeEnabled {
+                        deleteIconButton {
+                            deleteSong(song)
+                        }
+                    }
+                }
             }
         }
         .padding(.horizontal, 12)
@@ -109,28 +118,37 @@ struct SongsView: View {
                 .padding(.top, 6)
 
             ForEach(songs) { song in
-                NavigationLink(value: song) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(song.title(for: language))
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(hex: "#1D2430"))
+                ZStack(alignment: .topTrailing) {
+                    NavigationLink(value: song) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(song.title(for: language))
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(hex: "#1D2430"))
 
-                        Text(song.lyricsText(for: language))
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
-                            .lineSpacing(4)
-                            .lineLimit(2)
+                            Text(song.lyricsText(for: language))
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
+                                .lineSpacing(4)
+                                .lineLimit(2)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
+                        )
                     }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
-                    )
+                    .buttonStyle(.plain)
+                    .disabled(isEditModeEnabled)
+
+                    if isEditModeEnabled {
+                        deleteIconButton {
+                            deleteSong(song)
+                        }
+                    }
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
@@ -191,6 +209,25 @@ struct SongsView: View {
         )
         .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
         .padding(.vertical, 4)
+    }
+
+    private func deleteSong(_ song: SongItem) {
+        guard let deletedIndex = songs.firstIndex(where: { $0.id == song.id }) else { return }
+        songs.removeAll { $0.id == song.id }
+        player.handleSongDeleted(at: deletedIndex, remainingCount: songs.count)
+    }
+
+    private func deleteIconButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "trash.fill")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 22, height: 22)
+                .background(Color.red)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(8)
     }
 
     private var playbackControls: some View {
@@ -404,6 +441,23 @@ private final class SongsPlayerController: ObservableObject {
             next = 0
         }
         play(at: next, songs: songs)
+    }
+
+    func handleSongDeleted(at deletedIndex: Int, remainingCount: Int) {
+        guard let currentIndex else { return }
+
+        if remainingCount == 0 {
+            stop()
+            self.currentIndex = nil
+            return
+        }
+
+        if deletedIndex == currentIndex {
+            stop()
+            self.currentIndex = nil
+        } else if deletedIndex < currentIndex {
+            self.currentIndex = currentIndex - 1
+        }
     }
 }
 

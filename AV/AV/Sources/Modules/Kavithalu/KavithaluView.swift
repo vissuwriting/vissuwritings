@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct KavithaluView: View {
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguageRaw = AppLanguage.english.rawValue
+    @AppStorage(AppConstants.editModeStorageKey) private var isEditModeEnabled = false
 
     @State private var kavithalu: [KavithaItem] = []
     @State private var selectedCategoryKey: String = AppConstants.Kavithalu.defaultSelectedCategory
@@ -56,12 +57,21 @@ struct KavithaluView: View {
                             .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                         } else {
                             ForEach(filteredKavithalu) { item in
-                                kavithaCard(item)
-                                    .contentShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius))
-                                    .onTapGesture {
-                                        selectedKavitha = item
-                                        isDetailActive = true
+                                ZStack(alignment: .topTrailing) {
+                                    kavithaCard(item)
+                                        .contentShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius))
+                                        .onTapGesture {
+                                            guard !isEditModeEnabled else { return }
+                                            selectedKavitha = item
+                                            isDetailActive = true
+                                        }
+
+                                    if isEditModeEnabled {
+                                        deleteIconButton {
+                                            deleteKavitha(item)
+                                        }
                                     }
+                                }
                             }
                         }
                     }
@@ -239,6 +249,25 @@ struct KavithaluView: View {
             likedKavithaIDs.insert(item.id)
             likedCounts[item.id] = currentCount + 1
         }
+    }
+
+    private func deleteKavitha(_ item: KavithaItem) {
+        kavithalu.removeAll { $0.id == item.id }
+        likedKavithaIDs.remove(item.id)
+        likedCounts[item.id] = nil
+    }
+
+    private func deleteIconButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "trash.fill")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 22, height: 22)
+                .background(Color.red)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(8)
     }
 }
 

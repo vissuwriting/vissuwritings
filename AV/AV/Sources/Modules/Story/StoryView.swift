@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct StoryView: View {
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
+    @AppStorage(AppConstants.editModeStorageKey) private var isEditModeEnabled = false
     @State private var stories: [StoryItem] = []
     @State private var selectedCategory = AppConstants.Story.defaultCategory
     @State private var selectedStory: StoryItem?
@@ -52,14 +53,23 @@ struct StoryView: View {
                                 .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
                         } else {
                             ForEach(filteredStories) { story in
-                                storyCard(story)
-                                    .contentShape(RoundedRectangle(cornerRadius: AppConstants.Story.cardCornerRadius))
-                                    .onTapGesture {
-                                        guard Date() >= cardTapBlockedUntil else { return }
-                                        selectedStory = story
-                                        isStoryActive = true
+                                ZStack(alignment: .topTrailing) {
+                                    storyCard(story)
+                                        .contentShape(RoundedRectangle(cornerRadius: AppConstants.Story.cardCornerRadius))
+                                        .onTapGesture {
+                                            guard !isEditModeEnabled else { return }
+                                            guard Date() >= cardTapBlockedUntil else { return }
+                                            selectedStory = story
+                                            isStoryActive = true
+                                        }
+                                        .disabled(isFilterSwitching)
+
+                                    if isEditModeEnabled {
+                                        deleteIconButton {
+                                            deleteStory(story)
+                                        }
                                     }
-                                    .disabled(isFilterSwitching)
+                                }
                             }
                         }
                     }
@@ -140,6 +150,23 @@ struct StoryView: View {
             RoundedRectangle(cornerRadius: AppConstants.Story.cardCornerRadius)
                 .stroke(Color(hex: AppConstants.Story.cardBorderHex), lineWidth: AppConstants.Story.cardBorderWidth)
         )
+    }
+
+    private func deleteStory(_ story: StoryItem) {
+        stories.removeAll { $0.id == story.id }
+    }
+
+    private func deleteIconButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "trash.fill")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 22, height: 22)
+                .background(Color.red)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(8)
     }
 }
 
