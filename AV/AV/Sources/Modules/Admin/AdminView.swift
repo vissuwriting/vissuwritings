@@ -73,7 +73,7 @@ struct AdminView: View {
                         )
 
                         Text(managementTitle)
-                            .font(.system(size: 28, weight: .heavy, design: .rounded))
+                            .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundColor(Color(hex: "#1D2430"))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.top, 4)
@@ -109,12 +109,12 @@ struct AdminView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 17, weight: .bold))
                     .foregroundColor(Color(hex: "#2A3342"))
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(item.subtitle)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundColor(Color(hex: "#95A1B2"))
                     .fixedSize(horizontal: false, vertical: true)
             }

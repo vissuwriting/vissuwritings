@@ -189,18 +189,12 @@ struct KavithaluView: View {
 
     private func kavithaCard(_ item: KavithaItem) -> some View {
         HStack(alignment: .top, spacing: AppConstants.Kavithalu.zeroSpacing) {
-            ZStack {
-                LinearGradient(
-                    colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
-                    startPoint: .top,
-                    endPoint: .bottom
+            KavithaPhotoView(item: item)
+                .frame(
+                    width: AppConstants.Kavithalu.cardImageWidth,
+                    height: AppConstants.Kavithalu.cardHeight
                 )
-
-                Image(systemName: item.style.symbol)
-                    .font(.system(size: AppConstants.Kavithalu.cardImageSymbolSize, weight: .semibold))
-                    .foregroundColor(.white.opacity(AppConstants.Kavithalu.cardImageSymbolOpacity))
-            }
-            .frame(width: AppConstants.Kavithalu.cardImageWidth)
+                .clipped()
 
             VStack(alignment: .leading, spacing: AppConstants.Kavithalu.cardContentSpacing) {
                 Text(item.title(for: language))
@@ -236,7 +230,8 @@ struct KavithaluView: View {
                 .padding(.top, AppConstants.Kavithalu.cardMetaTopPadding)
             }
             .padding(AppConstants.Kavithalu.cardContentPadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(.white)
         }
         .frame(height: AppConstants.Kavithalu.cardHeight)
         .background(.white)
@@ -296,6 +291,7 @@ private struct KavithaItem: Identifiable, Decodable, Hashable {
     let fullKavithaTelugu: String?
     let likes: Int
     let category: String
+    let imageURL: String?
 
     var categoryKey: String {
         let lower = category.lowercased()
@@ -354,6 +350,25 @@ private struct KavithaItem: Identifiable, Decodable, Hashable {
         }
         return fullKavitha
     }
+
+    var resolvedImageURL: String {
+        if let imageURL, !imageURL.isEmpty {
+            return imageURL
+        }
+
+        switch categoryKey {
+        case AppConstants.Kavithalu.Category.nature:
+            return "https://picsum.photos/id/1018/900/700"
+        case AppConstants.Kavithalu.Category.patriotic:
+            return "https://picsum.photos/id/1003/900/700"
+        case AppConstants.Kavithalu.Category.seasons:
+            return "https://picsum.photos/id/1011/900/700"
+        case AppConstants.Kavithalu.Category.love:
+            return "https://picsum.photos/id/1027/900/700"
+        default:
+            return "https://picsum.photos/id/1040/900/700"
+        }
+    }
 }
 
 private struct KavithaStyle {
@@ -411,17 +426,7 @@ private struct KavithaDetailView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: AppConstants.Kavithalu.detailSpacing) {
-                ZStack {
-                    LinearGradient(
-                        colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-
-                    Image(systemName: item.style.symbol)
-                        .font(.system(size: AppConstants.Kavithalu.detailHeroSymbolSize, weight: .bold))
-                        .foregroundColor(.white.opacity(AppConstants.Kavithalu.detailHeroSymbolOpacity))
-                }
+                KavithaPhotoView(item: item)
                 .frame(height: AppConstants.Kavithalu.detailHeroHeight)
                 .clipShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.detailHeroCornerRadius))
 
@@ -460,6 +465,47 @@ private struct KavithaDetailView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct KavithaPhotoView: View {
+    let item: KavithaItem
+
+    var body: some View {
+        Group {
+            if let url = URL(string: item.resolvedImageURL), !item.resolvedImageURL.isEmpty {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        placeholder
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .failure:
+                        placeholder
+                    @unknown default:
+                        placeholder
+                    }
+                }
+            } else {
+                placeholder
+            }
+        }
+    }
+
+    private var placeholder: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Image(systemName: item.style.symbol)
+                .font(.system(size: AppConstants.Kavithalu.cardImageSymbolSize, weight: .semibold))
+                .foregroundColor(.white.opacity(AppConstants.Kavithalu.cardImageSymbolOpacity))
+        }
     }
 }
 
