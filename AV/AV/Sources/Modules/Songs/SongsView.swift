@@ -40,8 +40,8 @@ struct SongsView: View {
                 AppColors.background
                     .ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: AppConstants.Songs.listSpacing) {
+                if songs.isEmpty {
+                    VStack(spacing: 16) {
                         Picker("", selection: $selectedSegment) {
                             Text(listenTitle).tag(SongsSegment.listen)
                             Text(readTitle).tag(SongsSegment.read)
@@ -49,15 +49,31 @@ struct SongsView: View {
                         .pickerStyle(.segmented)
                         .padding(.top, 6)
 
-                        if selectedSegment == .listen {
-                            listenSection
-                        } else {
-                            readSection
-                        }
+                        songsEmptyStateView
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 12)
-                    .padding(.bottom, 124)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: AppConstants.Songs.listSpacing) {
+                            Picker("", selection: $selectedSegment) {
+                                Text(listenTitle).tag(SongsSegment.listen)
+                                Text(readTitle).tag(SongsSegment.read)
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.top, 6)
+
+                            if selectedSegment == .listen {
+                                listenSection
+                            } else {
+                                readSection
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                        .padding(.bottom, 124)
+                    }
                 }
             }
             .navigationDestination(for: SongItem.self) { song in
@@ -65,7 +81,7 @@ struct SongsView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if selectedSegment == .listen {
+            if selectedSegment == .listen && !songs.isEmpty {
                 playbackControls
                     .padding(.horizontal, 16)
                     .padding(.bottom, 8)
@@ -88,13 +104,17 @@ struct SongsView: View {
                 .foregroundColor(Color(hex: "#1D2430"))
                 .padding(.top, 6)
 
-            ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
-                ZStack(alignment: .topTrailing) {
-                    songRow(song: song, index: index)
+            if songs.isEmpty {
+                songsEmptyStateView
+            } else {
+                ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
+                    ZStack(alignment: .topTrailing) {
+                        songRow(song: song, index: index)
 
-                    if isEditModeEnabled {
-                        deleteIconButton {
-                            deleteSong(song)
+                        if isEditModeEnabled {
+                            deleteIconButton {
+                                deleteSong(song)
+                            }
                         }
                     }
                 }
@@ -117,35 +137,39 @@ struct SongsView: View {
                 .foregroundColor(Color(hex: "#1D2430"))
                 .padding(.top, 6)
 
-            ForEach(songs) { song in
-                ZStack(alignment: .topTrailing) {
-                    NavigationLink(value: song) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(song.title(for: language))
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(hex: "#1D2430"))
+            if songs.isEmpty {
+                songsEmptyStateView
+            } else {
+                ForEach(songs) { song in
+                    ZStack(alignment: .topTrailing) {
+                        NavigationLink(value: song) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(song.title(for: language))
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(hex: "#1D2430"))
 
-                            Text(song.lyricsText(for: language))
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
-                                .lineSpacing(4)
-                                .lineLimit(2)
+                                Text(song.lyricsText(for: language))
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
+                                    .lineSpacing(4)
+                                    .lineLimit(2)
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
+                            )
                         }
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color(hex: AppConstants.Songs.cardBorderHex), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isEditModeEnabled)
+                        .buttonStyle(.plain)
+                        .disabled(isEditModeEnabled)
 
-                    if isEditModeEnabled {
-                        deleteIconButton {
-                            deleteSong(song)
+                        if isEditModeEnabled {
+                            deleteIconButton {
+                                deleteSong(song)
+                            }
                         }
                     }
                 }
@@ -228,6 +252,26 @@ struct SongsView: View {
         }
         .buttonStyle(.plain)
         .padding(8)
+    }
+
+    private var songsEmptyStateView: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "#E8ECF1"))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: "music.note")
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
+            }
+
+            Text(AppConstants.genericEmptyText(language))
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(Color(hex: AppConstants.Songs.subtleHex))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 24)
     }
 
     private var playbackControls: some View {

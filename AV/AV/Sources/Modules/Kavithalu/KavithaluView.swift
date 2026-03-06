@@ -31,31 +31,28 @@ struct KavithaluView: View {
                 AppColors.background
                     .ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
+                if filteredKavithalu.isEmpty {
                     VStack(spacing: AppConstants.Kavithalu.rootSpacing) {
                         greetingsView
+                            .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
+                            .padding(.top, AppConstants.Kavithalu.rootTopPadding)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: AppConstants.Kavithalu.horizontalChipSpacing) {
-                                ForEach(AppConstants.Kavithalu.categoryKeys, id: \.self) { key in
-                                    categoryChip(key)
+                        emptyStateView
+                    }
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: AppConstants.Kavithalu.rootSpacing) {
+                            greetingsView
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: AppConstants.Kavithalu.horizontalChipSpacing) {
+                                    ForEach(AppConstants.Kavithalu.categoryKeys, id: \.self) { key in
+                                        categoryChip(key)
+                                    }
                                 }
+                                .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                             }
-                            .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
-                        }
 
-                        if filteredKavithalu.isEmpty {
-                            Text(
-                                AppConstants.Kavithalu.emptyStateMessage(
-                                    category: AppConstants.Kavithalu.categoryLabel(for: selectedCategoryKey, language: language),
-                                    language: language
-                                )
-                            )
-                            .font(.system(size: AppConstants.Kavithalu.emptyStateFontSize, weight: .medium))
-                            .foregroundColor(Color(hex: AppConstants.Kavithalu.emptyStateColorHex))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
-                        } else {
                             ForEach(filteredKavithalu) { item in
                                 ZStack(alignment: .topTrailing) {
                                     kavithaCard(item)
@@ -74,10 +71,10 @@ struct KavithaluView: View {
                                 }
                             }
                         }
+                        .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
+                        .padding(.top, AppConstants.Kavithalu.rootTopPadding)
+                        .padding(.bottom, AppConstants.Kavithalu.rootBottomPadding)
                     }
-                    .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
-                    .padding(.top, AppConstants.Kavithalu.rootTopPadding)
-                    .padding(.bottom, AppConstants.Kavithalu.rootBottomPadding)
                 }
             }
             .background(
@@ -100,6 +97,27 @@ struct KavithaluView: View {
         .onChange(of: selectedLanguageRaw) { _ in
             positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
         }
+    }
+
+    private var emptyStateView: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "#E8ECF1"))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: "text.book.closed")
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.emptyStateColorHex))
+            }
+
+            Text(AppConstants.genericEmptyText(language))
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(Color(hex: AppConstants.Kavithalu.emptyStateColorHex))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
 
     private var greetingsView: some View {

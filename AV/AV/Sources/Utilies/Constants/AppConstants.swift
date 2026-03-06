@@ -40,6 +40,12 @@ enum AppLanguage: String, CaseIterable {
 enum AppConstants {
     static let languageStorageKey = "selectedLanguage"
     static let editModeStorageKey = "isEditModeEnabled"
+    static let genericEmptyTextEnglish = "No content available."
+    static let genericEmptyTextTelugu = "ప్రస్తుతం కంటెంట్ లేదు."
+
+    static func genericEmptyText(_ language: AppLanguage) -> String {
+        language == .telugu ? genericEmptyTextTelugu : genericEmptyTextEnglish
+    }
 
     enum Kavithalu {
         static let jsonFileName = "kavithalu"
@@ -200,7 +206,12 @@ enum AppConstants {
             language == .telugu ? positiveTipsTelugu : positiveTipsEnglish
         }
 
-        static func emptyStateMessage(category: String, language: AppLanguage) -> String {
+        static func emptyStateMessage(categoryKey: String, language: AppLanguage) -> String {
+            if categoryKey == Category.all {
+                return language == .telugu ? "ఇక్కడ కవితలు లేవు." : "No kavithalu available."
+            }
+
+            let category = categoryLabel(for: categoryKey, language: language)
             if language == .telugu {
                 return "\(category) లో సంబంధిత కవితలు లేవు."
             }

@@ -35,23 +35,20 @@ struct StoryView: View {
                 AppColors.background
                     .ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: AppConstants.Story.listSpacing) {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 10) {
-                                ForEach(AppConstants.Story.categories, id: \.self) { category in
-                                    categoryChip(category)
+                if filteredStories.isEmpty {
+                    emptyStateView
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: AppConstants.Story.listSpacing) {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(AppConstants.Story.categories, id: \.self) { category in
+                                        categoryChip(category)
+                                    }
                                 }
-                            }
-                            .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
-                        }
-
-                        if filteredStories.isEmpty {
-                            Text(AppConstants.Story.emptyText(language))
-                                .foregroundColor(Color(hex: "#6B7280"))
-                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
-                        } else {
+                            }
+
                             ForEach(filteredStories) { story in
                                 ZStack(alignment: .topTrailing) {
                                     storyCard(story)
@@ -72,9 +69,9 @@ struct StoryView: View {
                                 }
                             }
                         }
+                        .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
+                        .padding(.vertical, AppConstants.Story.rootVerticalPadding)
                     }
-                    .padding(.horizontal, AppConstants.Story.rootHorizontalPadding)
-                    .padding(.vertical, AppConstants.Story.rootVerticalPadding)
                 }
             }
             .background(
@@ -93,6 +90,27 @@ struct StoryView: View {
         .onAppear {
             stories = StoryItem.loadFromBundle(named: AppConstants.Story.jsonFileName)
         }
+    }
+
+    private var emptyStateView: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "#E8ECF1"))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: "book.closed.circle")
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundColor(Color(hex: "#6B7280"))
+            }
+
+            Text(AppConstants.genericEmptyText(language))
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(Color(hex: "#6B7280"))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
 
     private func categoryChip(_ category: String) -> some View {
