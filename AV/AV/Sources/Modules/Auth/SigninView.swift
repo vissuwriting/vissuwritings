@@ -2,7 +2,7 @@
 //  SigninView.swift
 //  AV
 //
-//  Created by Satvik on 06/03/26.
+//  Created by Medidi V V Satyanaryana Murtyk on 06/03/26.
 //
 
 import SwiftUI
@@ -312,61 +312,5 @@ struct IconPatternView: View {
             }
         }
         .ignoresSafeArea()
-    }
-}
-
-
-@available(iOS 16.0, *)
-struct KavithaluView: View {
-    
-    var body: some View {
-        NavigationStack {
-            Text(AppConstants.Dashboard.kavithaluTitle)
-                .font(AppConstants.Dashboard.kavithaluTitleFont)
-        }
-    }
-}
-
-@available(iOS 16.0, *)
-struct StoryView: View {
-    
-    var body: some View {
-        NavigationStack {
-            Text("Stories")
-                .font(.largeTitle)
-        }
-    }
-}
-
-@available(iOS 16.0, *)
-struct SongsView: View {
-    
-    var body: some View {
-        NavigationStack {
-            Text("Songs")
-                .font(.largeTitle)
-        }
-    }
-}
-
-@available(iOS 16.0, *)
-struct AdminView: View {
-    
-    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
-    
-    var body: some View {
-        
-        NavigationStack {
-            VStack(spacing: 20) {
-                
-                Text("Admin Screen")
-                    .font(.largeTitle)
-                
-                Button("Logout") {
-                    isLoggedIn = false
-                }
-                .foregroundColor(.red)
-            }
-        }
     }
 }

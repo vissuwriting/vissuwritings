@@ -1,0 +1,20 @@
+//
+//  SongsView.swift
+//  AV
+//
+//  Created by Medidi V V Satyanaryana Murtyk on 06/03/26.
+//
+
+import SwiftUI
+
+@available(iOS 16.0, *)
+struct SongsView: View {
+    
+    var body: some View {
+        NavigationStack {
+            Text("Songs")
+                .font(.largeTitle)
+        }
+    }
+}
+
