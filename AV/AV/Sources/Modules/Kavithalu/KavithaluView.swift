@@ -12,8 +12,13 @@ struct KavithaluView: View {
     
     var body: some View {
         NavigationStack {
-            Text(AppConstants.Dashboard.kavithaluTitle)
-                .font(AppConstants.Dashboard.kavithaluTitleFont)
+            ZStack {
+                AppColors.background
+                    .ignoresSafeArea()
+
+                Text(AppConstants.Dashboard.kavithaluTitle)
+                    .font(AppConstants.Dashboard.kavithaluTitleFont)
+            }
         }
     }
 }

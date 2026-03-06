@@ -12,9 +12,13 @@ struct SongsView: View {
     
     var body: some View {
         NavigationStack {
-            Text("Songs")
-                .font(.largeTitle)
+            ZStack {
+                AppColors.background
+                    .ignoresSafeArea()
+
+                Text("Songs")
+                    .font(.largeTitle)
+            }
         }
     }
 }
-

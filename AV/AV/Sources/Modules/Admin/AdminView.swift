@@ -15,15 +15,19 @@ struct AdminView: View {
     var body: some View {
         
         NavigationStack {
-            VStack(spacing: 20) {
-                
-                Text("Admin Screen")
-                    .font(.largeTitle)
-                
-                Button("Logout") {
-                    isLoggedIn = false
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+
+                VStack(spacing: 20) {
+                    
+                    Text("Admin Screen")
+                        .font(.largeTitle)
+                    
+                    Button("Logout") {
+                        isLoggedIn = false
+                    }
+                    .foregroundColor(.red)
                 }
-                .foregroundColor(.red)
             }
         }
     }

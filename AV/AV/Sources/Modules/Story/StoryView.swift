@@ -12,8 +12,13 @@ struct StoryView: View {
     
     var body: some View {
         NavigationStack {
-            Text("Stories")
-                .font(.largeTitle)
+            ZStack {
+                AppColors.background
+                    .ignoresSafeArea()
+
+                Text("Stories")
+                    .font(.largeTitle)
+            }
         }
     }
 }
