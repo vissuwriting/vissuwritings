@@ -91,7 +91,7 @@ struct AdminView: View {
                 }
             }
             .navigationDestination(for: AdminDestination.self) { destination in
-                destinationView(for: destination)
+                destinationView(for: destination) .tabBarHidden()
             }
         }
     }
