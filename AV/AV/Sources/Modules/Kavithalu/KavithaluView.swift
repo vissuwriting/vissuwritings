@@ -11,6 +11,8 @@ import SwiftUI
 struct KavithaluView: View {
     
     @State private var kavithalu: [KavithaItem] = KavithaItem.fallback
+    @State private var selectedCategory: String = "All"
+    private let categories: [String] = ["All", "Nature", "Love", "Patriotic", "Seasons"]
     
     var body: some View {
         NavigationStack {
@@ -20,13 +22,30 @@ struct KavithaluView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 14) {
-                        ForEach(kavithalu) { item in
-                            NavigationLink {
-                                KavithaDetailView(item: item)
-                            } label: {
-                                kavithaCard(item)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(categories, id: \.self) { category in
+                                    categoryChip(category)
+                                }
                             }
-                            .buttonStyle(.plain)
+                            .padding(.horizontal, 12)
+                        }
+                        
+                        if filteredKavithalu.isEmpty {
+                            Text("No related kavithalu in \(selectedCategory).")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color(hex: "#6B7280"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 12)
+                        } else {
+                            ForEach(filteredKavithalu) { item in
+                                NavigationLink {
+                                    KavithaDetailView(item: item)
+                                } label: {
+                                    kavithaCard(item)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
                     .padding(.horizontal, 12)
@@ -38,6 +57,34 @@ struct KavithaluView: View {
         .onAppear {
             kavithalu = KavithaItem.loadFromBundle(named: "kavithalu")
         }
+    }
+    
+    private var filteredKavithalu: [KavithaItem] {
+        if selectedCategory == "All" { return kavithalu }
+        return kavithalu.filter { $0.category.caseInsensitiveCompare(selectedCategory) == .orderedSame }
+    }
+    
+    private func categoryChip(_ category: String) -> some View {
+        let selected = selectedCategory == category
+        
+        return Button {
+            selectedCategory = category
+        } label: {
+            Text(category)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(Color(hex: "#4B5563"))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selected ? Color(hex: "#E8ECF1") : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color(hex: "#D6DCE5"), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
     
     private func kavithaCard(_ item: KavithaItem) -> some View {
