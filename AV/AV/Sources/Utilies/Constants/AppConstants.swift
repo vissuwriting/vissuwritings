@@ -69,7 +69,7 @@ enum AppConstants {
         static let backgroundOpacity = 0.8
         static let patternOpacity = 0.10
         static let disabledButtonOpacity = 0.3
-        static let fieldBorderOpacity = 0.7
+        static let fieldBorderOpacity = 0.4
 
         static let headerFontSize: CGFloat = 32
         static let forgotPasswordFontSize: CGFloat = 14
@@ -81,7 +81,7 @@ enum AppConstants {
         static let bottomSectionTopPadding: CGFloat = 5
         static let formHorizontalPadding: CGFloat = 35
         static let formTopPadding: CGFloat = 80
-        static let fieldBorderLineWidth: CGFloat = 1
+        static let fieldBorderLineWidth: CGFloat = 0.8
     }
 
     enum Signup {
@@ -108,7 +108,7 @@ enum AppConstants {
         static let backgroundOpacity = 0.8
         static let patternOpacity = 0.10
         static let disabledButtonOpacity = 0.3
-        static let fieldBorderOpacity = 0.7
+        static let fieldBorderOpacity = 0.4
 
         static let headerFontSize: CGFloat = 32
         static let titleSpacing: CGFloat = 22
@@ -119,7 +119,6 @@ enum AppConstants {
         static let formTopPadding: CGFloat = 85
         static let buttonCornerRadius: CGFloat = 14
         static let rootStackSpacing: CGFloat = 0
-        static let fieldBorderLineWidth: CGFloat = 1
+        static let fieldBorderLineWidth: CGFloat = 0.5
     }
 }
-
