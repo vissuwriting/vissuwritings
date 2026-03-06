@@ -36,7 +36,7 @@ struct KavithaluView: View {
     }
     
     private func kavithaCard(_ item: KavithaItem) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 0) {
             ZStack {
                 LinearGradient(
                     colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
@@ -48,8 +48,7 @@ struct KavithaluView: View {
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.white.opacity(0.9))
             }
-            .frame(width: 112, height: 112)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(width: 112)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
@@ -79,9 +78,10 @@ struct KavithaluView: View {
                 }
                 .padding(.top, 3)
             }
+            .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(10)
+        .frame(height: 122)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
@@ -159,4 +159,12 @@ private extension KavithaItem {
             category: "Love"
         )
     ]
+}
+
+#Preview {
+    if #available(iOS 16.0, *) {
+        KavithaluView()
+    } else {
+        EmptyView()
+    }
 }
