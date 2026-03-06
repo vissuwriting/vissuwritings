@@ -221,6 +221,90 @@ enum AppConstants {
         }
     }
 
+    enum Story {
+        static let jsonFileName = "stories"
+        static let jsonFileExtension = "json"
+
+        static let defaultCategory = "All"
+        static let categoryAll = "All"
+        static let categoryMoral = "Moral"
+        static let categoryLife = "Life"
+        static let categoryInspiration = "Inspiration"
+        static let categoryVillage = "Village"
+        static let categories = [categoryAll, categoryMoral, categoryLife, categoryInspiration, categoryVillage]
+
+        static let listSpacing: CGFloat = 14
+        static let cardCornerRadius: CGFloat = 16
+        static let cardBorderWidth: CGFloat = 1
+        static let cardImageHeight: CGFloat = 150
+        static let contentPadding: CGFloat = 14
+        static let chipCornerRadius: CGFloat = 8
+        static let chipHorizontalPadding: CGFloat = 8
+        static let chipVerticalPadding: CGFloat = 4
+        static let categoryChipSize: CGFloat = 12
+        static let readTimeSize: CGFloat = 13
+        static let titleSize: CGFloat = 29
+        static let detailTitleSize: CGFloat = 32
+        static let authorSize: CGFloat = 13
+        static let summarySize: CGFloat = 15
+        static let detailBodySize: CGFloat = 18
+        static let readButtonSize: CGFloat = 18
+        static let readButtonTopPadding: CGFloat = 6
+        static let rootHorizontalPadding: CGFloat = 12
+        static let rootVerticalPadding: CGFloat = 12
+        static let categoryRowTopPadding: CGFloat = 2
+        static let titleTopPadding: CGFloat = 4
+        static let authorTopPadding: CGFloat = 2
+        static let summaryTopPadding: CGFloat = 5
+        static let detailSpacing: CGFloat = 16
+
+        static let clockIcon = "clock"
+        static let readIcon = "book.fill"
+        static let imageFallbackSymbol = "photo"
+        static let imageFallbackTopHex = "#A6C3D8"
+        static let imageFallbackBottomHex = "#7FAE92"
+
+        static let cardBackgroundHex = "#FFFFFF"
+        static let cardBorderHex = "#E8EEF5"
+        static let titleHex = "#1B2430"
+        static let authorHex = "#4D8CC8"
+        static let summaryHex = "#7A8698"
+        static let readTimeHex = "#8C98AA"
+        static let readActionHex = "#2F82D8"
+        static let categoryBgHex = "#E8F7E8"
+        static let categoryTextHex = "#59A26B"
+
+        static func readStoryTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? "కథ చదవండి" : "Read Story"
+        }
+
+        static let fixedAuthorName = "Vissu"
+
+        static func byAuthor(_ language: AppLanguage) -> String {
+            language == .telugu ? "విస్సు రచన" : fixedAuthorName
+        }
+
+        static func readMinutesText(_ minutes: Int, _ language: AppLanguage) -> String {
+            language == .telugu ? "\(minutes) నిమిషాల చదువు" : "\(minutes) min read"
+        }
+
+        static func categoryLabel(_ key: String, _ language: AppLanguage) -> String {
+            guard language == .telugu else { return key }
+            switch key {
+            case categoryAll: return "అన్నీ"
+            case categoryMoral: return "నీతి"
+            case categoryLife: return "జీవితం"
+            case categoryInspiration: return "ప్రేరణ"
+            case categoryVillage: return "పల్లె"
+            default: return key
+            }
+        }
+
+        static func emptyText(_ language: AppLanguage) -> String {
+            language == .telugu ? "ఈ విభాగంలో కథలు లేవు." : "No stories in this category."
+        }
+    }
+
     enum Brand {
         static let primaryTitle = "Vissu"
         static let secondaryTitle = "Sahithi"
