@@ -16,16 +16,17 @@ struct ContentView: View {
     var body: some View {
         
         ZStack(alignment: .top) {
-            
-            // Top Background
+
             Color(red: 0.94, green: 0.42, blue: 0.40)
                 .ignoresSafeArea()
-            
+
+            IconPatternView()
+                .opacity(0.10)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
-                
                 Spacer().frame(height: 240)
-                
-                // White Wave Section
+
                 WaveShape()
                     .fill(Color.white)
                     .ignoresSafeArea()
@@ -155,4 +156,48 @@ struct WaveShape: Shape {
 
 #Preview {
     ContentView()
+}
+
+
+struct IconPatternView: View {
+    
+    let icons = [
+        "book.closed",
+        "pencil",
+        "music.note",
+        "doc.text",
+        "mic",
+        "quote.bubble",
+        "note.text"
+    ]
+    
+    let columns = 5
+    let rows = 6
+    
+    var body: some View {
+        
+        GeometryReader { geo in
+            
+            let cellWidth = geo.size.width / CGFloat(columns)
+            let cellHeight: CGFloat = 90
+            
+            ZStack {
+                
+                ForEach(0..<rows, id: \.self) { row in
+                    ForEach(0..<columns, id: \.self) { col in
+                        
+                        Image(systemName: icons[(row + col) % icons.count])
+                            .font(.system(size: 42))
+                            .foregroundColor(.white.opacity(0.95))
+                            .rotationEffect(.degrees(Double.random(in: -20...20)))
+                            .position(
+                                x: cellWidth * CGFloat(col) + cellWidth / 2,
+                                y: cellHeight * CGFloat(row) + 40
+                            )
+                    }
+                }
+            }
+        }
+        .ignoresSafeArea()
+    }
 }
