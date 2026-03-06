@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Sri Anjaneyam",
+    "titleTelugu": "శ్రీ ఆంజనేయం",
+    "genre": "Devotional",
+    "genreTelugu": "భక్తి",
+    "duration": "0:15",
+    "imageURL": "https://picsum.photos/id/444/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-15s.mp3"
+  },
+  {
+    "title": "Vennela Ratri",
+    "titleTelugu": "వెన్నెల రాత్రి",
+    "genre": "Patriotic",
+    "genreTelugu": "దేశభక్తి",
+    "duration": "0:12",
+    "imageURL": "https://picsum.photos/id/250/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-12s.mp3"
+  },
+  {
+    "title": "Raga Tarangam",
+    "titleTelugu": "రాగ తరంగం",
+    "genre": "Classical",
+    "genreTelugu": "శాస్త్రీయ",
+    "duration": "0:09",
+    "imageURL": "https://picsum.photos/id/10/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-9s.mp3"
+  },
+  {
+    "title": "Mallipulu",
+    "titleTelugu": "మల్లిపూలు",
+    "genre": "Folk",
+    "genreTelugu": "జానపదం",
+    "duration": "0:06",
+    "imageURL": "https://picsum.photos/id/118/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-6s.mp3"
+  },
+  {
+    "title": "Telugu Jathi",
+    "titleTelugu": "తెలుగు జాతి",
+    "genre": "Devotional",
+    "genreTelugu": "భక్తి",
+    "duration": "0:03",
+    "imageURL": "https://picsum.photos/id/299/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-3s.mp3"
+  }
+]

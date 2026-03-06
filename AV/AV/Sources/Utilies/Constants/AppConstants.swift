@@ -65,7 +65,7 @@ enum AppConstants {
         static let greetingTitleEnglish = "Good Evening...!"
         static let greetingTitleTelugu = "శుభ సాయంత్రం...!"
         static let authorLabelEnglish = "By Vissu"
-        static let authorLabelTelugu = "విస్సు రచన"
+        static let authorLabelTelugu = "రచన: విస్సు"
         static let minReadSuffixEnglish = "min read"
         static let minReadSuffixTelugu = "నిమిషాల చదువు"
         static let jsonFileExtension = "json"
@@ -281,7 +281,7 @@ enum AppConstants {
         static let fixedAuthorName = "Vissu"
 
         static func byAuthor(_ language: AppLanguage) -> String {
-            language == .telugu ? "విస్సు రచన" : fixedAuthorName
+            language == .telugu ? "రచన: విస్సు" : fixedAuthorName
         }
 
         static func readMinutesText(_ minutes: Int, _ language: AppLanguage) -> String {
@@ -302,6 +302,81 @@ enum AppConstants {
 
         static func emptyText(_ language: AppLanguage) -> String {
             language == .telugu ? "ఈ విభాగంలో కథలు లేవు." : "No stories in this category."
+        }
+    }
+
+    enum Songs {
+        static let jsonFileName = "songs"
+        static let jsonFileExtension = "json"
+
+        static let featuredTitleEnglish = "Featured Playlist"
+        static let featuredTitleTelugu = "ప్రధాన ప్లేలిస్ట్"
+        static let featuredSubtitleEnglish = "Best of Telugu Songs"
+        static let featuredSubtitleTelugu = "అత్యుత్తమ తెలుగు పాటలు"
+        static let sectionTitleEnglish = "All Songs"
+        static let sectionTitleTelugu = "అన్ని పాటలు"
+        static let nowPlayingPrefixEnglish = "Now Playing:"
+        static let nowPlayingPrefixTelugu = "ఇప్పుడు వినిపిస్తున్నది:"
+        static let noSongSelectedEnglish = "No song selected"
+        static let noSongSelectedTelugu = "ఏ పాట ఎంచుకోలేదు"
+        static let playTitleEnglish = "Play"
+        static let playTitleTelugu = "ప్లే"
+        static let pauseTitleEnglish = "Pause"
+        static let pauseTitleTelugu = "పాజ్"
+        static let stopTitleEnglish = "Stop"
+        static let stopTitleTelugu = "ఆపు"
+
+        static let featuredImageURL = "https://picsum.photos/id/119/1200/500"
+        static let bannerHeight: CGFloat = 180
+        static let bannerCornerRadius: CGFloat = 18
+        static let listRowImageSize: CGFloat = 56
+        static let listRowCornerRadius: CGFloat = 10
+        static let listSpacing: CGFloat = 12
+        static let rootHorizontalPadding: CGFloat = 12
+        static let sectionTopPadding: CGFloat = 8
+        static let controlsTopPadding: CGFloat = 8
+        static let controlsBottomPadding: CGFloat = 12
+        static let previewDurationSeconds: Double = 10
+
+        static let playIcon = "play.fill"
+        static let pauseIcon = "pause.fill"
+        static let stopIcon = "stop.fill"
+        static let headphonesIcon = "headphones"
+        static let defaultArtTopHex = "#7A5D4A"
+        static let defaultArtBottomHex = "#2E3A50"
+        static let accentHex = "#2F82D8"
+        static let cardBorderHex = "#E5EAF1"
+        static let subtleHex = "#8A96A8"
+
+        static func featuredTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? featuredTitleTelugu : featuredTitleEnglish
+        }
+
+        static func featuredSubtitle(_ language: AppLanguage) -> String {
+            language == .telugu ? featuredSubtitleTelugu : featuredSubtitleEnglish
+        }
+
+        static func sectionTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? sectionTitleTelugu : sectionTitleEnglish
+        }
+
+        static func playTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? playTitleTelugu : playTitleEnglish
+        }
+
+        static func pauseTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? pauseTitleTelugu : pauseTitleEnglish
+        }
+
+        static func stopTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? stopTitleTelugu : stopTitleEnglish
+        }
+
+        static func nowPlayingText(songTitle: String?, language: AppLanguage) -> String {
+            if let songTitle, !songTitle.isEmpty {
+                return "\(language == .telugu ? nowPlayingPrefixTelugu : nowPlayingPrefixEnglish) \(songTitle)"
+            }
+            return language == .telugu ? noSongSelectedTelugu : noSongSelectedEnglish
         }
     }
 
@@ -332,7 +407,7 @@ enum AppConstants {
         static let shadowYOffset: CGFloat = 3
 
         static func primaryTitle(for language: AppLanguage) -> String {
-            language == .telugu ? "విస్సు" : primaryTitle
+            language == .telugu ? "రచన: విస్సు" : primaryTitle
         }
 
         static func secondaryTitle(for language: AppLanguage) -> String {
