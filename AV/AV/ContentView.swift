@@ -11,7 +11,13 @@ struct ContentView: View {
     
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var remember: Bool = false
+    
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case email
+        case password
+    }
     
     var body: some View {
         
@@ -33,6 +39,9 @@ struct ContentView: View {
                     .overlay(formSection)
             }
         }
+        .onTapGesture {
+            dismissKeyboard()
+        }
     }
 }
 
@@ -45,6 +54,7 @@ extension ContentView {
             Text("Sign in")
                 .font(.system(size: 32, weight: .bold))
             
+            
             /// Email Field
             HStack {
                 
@@ -53,6 +63,11 @@ extension ContentView {
                 
                 TextField("Enter your Name", text: $email)
                     .autocapitalization(.none)
+                    .focused($focusedField, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .password
+                    }
             }
             .padding()
             .background(
@@ -72,6 +87,11 @@ extension ContentView {
                     .foregroundColor(.gray)
                 
                 SecureField("Enter your password", text: $password)
+                    .focused($focusedField, equals: .password)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        dismissKeyboard()
+                    }
             }
             .padding()
             .background(
@@ -84,27 +104,38 @@ extension ContentView {
             )
             
             
-            /// Remember + Forgot
-            HStack {
-            Spacer()
-                Text("Forgot Password?")
-                    .foregroundColor(.red)
-                    .font(.system(size: 14))
+            /// Forgot Password (Only when typing password)
+            if focusedField == .password {
+                
+                HStack {
+                    Spacer()
+                    
+                    Text("Forgot Password?")
+                        .foregroundColor(.red)
+                        .font(.system(size: 14))
+                }
+                .transition(.opacity)
             }
             
             
             /// Login Button
             Button {
-                
+                dismissKeyboard()
+                print("Login tapped")
             } label: {
                 
                 Text("Login")
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(red: 0.94, green: 0.42, blue: 0.40))
+                    .background(
+                        (email.isEmpty || password.isEmpty)
+                        ? Color(red: 0.94, green: 0.42, blue: 0.40).opacity(0.3)
+                        : Color(red: 0.94, green: 0.42, blue: 0.40)
+                    )
                     .cornerRadius(14)
             }
+            .disabled(email.isEmpty || password.isEmpty)
             .padding(.top, -5)
             
             
@@ -128,6 +159,17 @@ extension ContentView {
         .padding(.top, 80)
     }
 }
+
+
+// MARK: - Keyboard Dismiss
+
+extension ContentView {
+    
+    func dismissKeyboard() {
+        focusedField = nil
+    }
+}
+
 
 struct WaveShape: Shape {
     
