@@ -73,7 +73,7 @@ struct KavithaluView: View {
             .background(
                 NavigationLink(isActive: $isDetailActive) {
                     if let item = selectedKavitha {
-                        KavithaDetailView(item: item, language: language)
+                        KavithaDetailView(item: item, language: language) .tabBarHidden()
                     } else {
                         EmptyView()
                     }
@@ -95,7 +95,7 @@ struct KavithaluView: View {
     private var greetingsView: some View {
         HStack(spacing: AppConstants.Kavithalu.cardContentPadding) {
             NavigationLink {
-                UserProfileView()
+                UserProfileView() .tabBarHidden()
             } label: {
                 ZStack {
                     Circle()
