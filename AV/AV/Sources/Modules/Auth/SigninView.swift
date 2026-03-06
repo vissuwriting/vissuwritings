@@ -12,6 +12,7 @@ import SwiftUI
 struct SigninView: View {
     
     @Binding var isLoggedIn: Bool
+    @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
 
     @State private var email: String = ""
     @State private var password: String = ""
@@ -21,6 +22,10 @@ struct SigninView: View {
     enum Field {
         case email
         case password
+    }
+
+    private var language: AppLanguage {
+        AppLanguage.from(selectedLanguage)
     }
     
     var body: some View {
@@ -62,7 +67,7 @@ extension SigninView {
         VStack(spacing: AppConstants.Brand.contentSpacing) {
             VStack(spacing: AppConstants.Brand.titleSpacing) {
                 HStack(spacing: 8) {
-                    Text(AppConstants.Brand.primaryTitle)
+                    Text(AppConstants.Brand.primaryTitle(for: language))
                         .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(
@@ -85,7 +90,7 @@ extension SigninView {
                         )
                 }
 
-                Text(AppConstants.Brand.secondaryTitle)
+                Text(AppConstants.Brand.secondaryTitle(for: language))
                     .font(.system(size: AppConstants.Brand.secondaryFontSize, weight: .semibold, design: .serif))
                     .italic()
                     .kerning(AppConstants.Brand.secondaryKerning)
@@ -112,8 +117,9 @@ extension SigninView {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: AppConstants.Signin.formSpacing) {
                 
-                Text(AppConstants.Signin.title)
+                Text(AppConstants.Signin.title(for: language))
                     .font(.system(size: AppConstants.Signin.headerFontSize, weight: .bold))
+                
                 
                 
                 /// Email Field
@@ -122,7 +128,7 @@ extension SigninView {
                     Image(systemName: AppConstants.Signin.emailIcon)
                         .foregroundColor(AppConstants.Signin.textFieldIconColor)
                     
-                    TextField(AppConstants.Signin.emailPlaceholder, text: $email)
+                    TextField(AppConstants.Signin.emailPlaceholder(for: language), text: $email)
                         .autocapitalization(.none)
                         .focused($focusedField, equals: .email)
                         .submitLabel(.next)
@@ -150,7 +156,7 @@ extension SigninView {
                     Image(systemName: AppConstants.Signin.passwordIcon)
                         .foregroundColor(AppConstants.Signin.textFieldIconColor)
                     
-                    SecureField(AppConstants.Signin.passwordPlaceholder, text: $password)
+                    SecureField(AppConstants.Signin.passwordPlaceholder(for: language), text: $password)
                         .focused($focusedField, equals: .password)
                         .submitLabel(.done)
                         .onSubmit {
@@ -177,7 +183,7 @@ extension SigninView {
                     HStack {
                         Spacer()
                         
-                        Text(AppConstants.Signin.forgotPasswordTitle)
+                        Text(AppConstants.Signin.forgotPasswordTitle(for: language))
                             .foregroundColor(AppConstants.Signin.accentColor)
                             .font(.system(size: AppConstants.Signin.forgotPasswordFontSize))
                     }
@@ -192,7 +198,7 @@ extension SigninView {
                     
                 } label: {
                     
-                    Text(AppConstants.Signin.loginTitle)
+                    Text(AppConstants.Signin.loginTitle(for: language))
                         .foregroundColor(AppConstants.Signin.foregroundOnAccentColor)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -212,11 +218,11 @@ extension SigninView {
                 HStack {
                     Spacer()
                     
-                    Text(AppConstants.Signin.noAccountTitle)
+                    Text(AppConstants.Signin.noAccountTitle(for: language))
                         .foregroundColor(AppConstants.Signin.bottomTextColor)
                     
                     NavigationLink(destination: SignupView()) {
-                        Text(AppConstants.Signin.signUpTitle)
+                        Text(AppConstants.Signin.signUpTitle(for: language))
                             .foregroundColor(AppConstants.Signin.accentColor)
                             .fontWeight(.semibold)
                     }

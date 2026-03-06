@@ -9,44 +9,51 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct KavithaluView: View {
-    
-    @State private var kavithalu: [KavithaItem] = KavithaItem.fallback
-    @State private var selectedCategory: String = AppConstants.Kavithalu.defaultSelectedCategory
+    @AppStorage(AppConstants.languageStorageKey) private var selectedLanguageRaw = AppLanguage.english.rawValue
+
+    @State private var kavithalu: [KavithaItem] = []
+    @State private var selectedCategoryKey: String = AppConstants.Kavithalu.defaultSelectedCategory
     @State private var positiveTip: String = AppConstants.Kavithalu.initialPositiveTip
-    
+
+    private var language: AppLanguage {
+        AppLanguage.from(selectedLanguageRaw)
+    }
+
+    @available(iOS 16.0, *)
     var body: some View {
         NavigationStack {
             ZStack {
                 AppColors.background
                     .ignoresSafeArea()
-                
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: AppConstants.Kavithalu.rootSpacing) {
                         greetingsView
-                        
+
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: AppConstants.Kavithalu.horizontalChipSpacing) {
-                                ForEach(AppConstants.Kavithalu.categories, id: \.self) { category in
-                                    categoryChip(category)
+                                ForEach(AppConstants.Kavithalu.categoryKeys, id: \.self) { key in
+                                    categoryChip(key)
                                 }
                             }
                             .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                         }
-                        
+
                         if filteredKavithalu.isEmpty {
                             Text(
-                                AppConstants.Kavithalu.emptyStateMessagePrefix +
-                                selectedCategory +
-                                AppConstants.Kavithalu.emptyStateMessageSuffix
+                                AppConstants.Kavithalu.emptyStateMessage(
+                                    category: AppConstants.Kavithalu.categoryLabel(for: selectedCategoryKey, language: language),
+                                    language: language
+                                )
                             )
-                                .font(.system(size: AppConstants.Kavithalu.emptyStateFontSize, weight: .medium))
-                                .foregroundColor(Color(hex: AppConstants.Kavithalu.emptyStateColorHex))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
+                            .font(.system(size: AppConstants.Kavithalu.emptyStateFontSize, weight: .medium))
+                            .foregroundColor(Color(hex: AppConstants.Kavithalu.emptyStateColorHex))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                         } else {
                             ForEach(filteredKavithalu) { item in
                                 NavigationLink {
-                                    KavithaDetailView(item: item) .tabBarHidden()
+                                    KavithaDetailView(item: item, language: language)
                                 } label: {
                                     kavithaCard(item)
                                 }
@@ -62,37 +69,40 @@ struct KavithaluView: View {
         }
         .onAppear {
             kavithalu = KavithaItem.loadFromBundle(named: AppConstants.Kavithalu.jsonFileName)
-            positiveTip = AppConstants.Kavithalu.positiveTips.randomElement() ?? positiveTip
+            positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
+        }
+        .onChange(of: selectedLanguageRaw) { _ in
+            positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
         }
     }
-    
+
     private var greetingsView: some View {
         HStack(spacing: AppConstants.Kavithalu.cardContentPadding) {
             NavigationLink {
-                UserProfileView() .tabBarHidden()
+                UserProfileView()
             } label: {
                 ZStack {
                     Circle()
                         .fill(Color(hex: AppConstants.Kavithalu.greetingAvatarColorHex))
                         .frame(width: AppConstants.Kavithalu.avatarSize, height: AppConstants.Kavithalu.avatarSize)
-                    
+
                     Image(systemName: AppConstants.Kavithalu.avatarSymbol)
                         .font(.system(size: AppConstants.Kavithalu.avatarIconSize, weight: .semibold))
                         .foregroundColor(.white.opacity(AppConstants.Kavithalu.avatarOpacity))
                 }
             }
             .buttonStyle(.plain)
-            
+
             VStack(alignment: .leading, spacing: AppConstants.Kavithalu.cardContentSpacing) {
-                Text(AppConstants.Kavithalu.greetingTitle)
+                Text(AppConstants.Kavithalu.greetingTitle(for: language))
                     .font(.system(size: AppConstants.Kavithalu.greetingTitleFontSize, weight: .bold))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.greetingTitleColorHex))
-                
+
                 Text(positiveTip)
                     .font(.system(size: AppConstants.Kavithalu.greetingTipFontSize, weight: .medium))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.greetingTipColorHex))
             }
-            
+
             Spacer()
         }
         .padding(.horizontal, AppConstants.Kavithalu.greetingHorizontalPadding)
@@ -102,19 +112,22 @@ struct KavithaluView: View {
                 .fill(Color(hex: AppConstants.Kavithalu.greetingCardColorHex))
         )
     }
-    
+
     private var filteredKavithalu: [KavithaItem] {
-        if selectedCategory == AppConstants.Kavithalu.Category.all { return kavithalu }
-        return kavithalu.filter { $0.category.caseInsensitiveCompare(selectedCategory) == .orderedSame }
+        if selectedCategoryKey == AppConstants.Kavithalu.Category.all {
+            return kavithalu
+        }
+        return kavithalu.filter { $0.categoryKey == selectedCategoryKey }
     }
-    
-    private func categoryChip(_ category: String) -> some View {
-        let selected = selectedCategory == category
-        
+
+    private func categoryChip(_ key: String) -> some View {
+        let selected = selectedCategoryKey == key
+        let label = AppConstants.Kavithalu.categoryLabel(for: key, language: language)
+
         return Button {
-            selectedCategory = category
+            selectedCategoryKey = key
         } label: {
-            Text(category)
+            Text(label)
                 .font(.system(size: AppConstants.Kavithalu.chipFontSize, weight: .medium))
                 .foregroundColor(Color(hex: AppConstants.Kavithalu.chipTextColorHex))
                 .padding(.horizontal, AppConstants.Kavithalu.chipHorizontalPadding)
@@ -125,15 +138,12 @@ struct KavithaluView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: AppConstants.Kavithalu.chipCornerRadius)
-                        .stroke(
-                            Color(hex: AppConstants.Kavithalu.chipBorderColorHex),
-                            lineWidth: AppConstants.Kavithalu.chipBorderWidth
-                        )
+                        .stroke(Color(hex: AppConstants.Kavithalu.chipBorderColorHex), lineWidth: AppConstants.Kavithalu.chipBorderWidth)
                 )
         }
         .buttonStyle(.plain)
     }
-    
+
     private func kavithaCard(_ item: KavithaItem) -> some View {
         HStack(alignment: .top, spacing: AppConstants.Kavithalu.zeroSpacing) {
             ZStack {
@@ -142,32 +152,32 @@ struct KavithaluView: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                
+
                 Image(systemName: item.style.symbol)
                     .font(.system(size: AppConstants.Kavithalu.cardImageSymbolSize, weight: .semibold))
                     .foregroundColor(.white.opacity(AppConstants.Kavithalu.cardImageSymbolOpacity))
             }
             .frame(width: AppConstants.Kavithalu.cardImageWidth)
-            
+
             VStack(alignment: .leading, spacing: AppConstants.Kavithalu.cardContentSpacing) {
-                Text(item.title)
+                Text(item.title(for: language))
                     .font(.system(size: AppConstants.Kavithalu.cardTitleFontSize, weight: .bold))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.cardTitleColorHex))
-                
-                Text(item.kavithaPreview)
+
+                Text(item.kavithaPreview(for: language))
                     .font(.system(size: AppConstants.Kavithalu.cardPreviewFontSize))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.cardPreviewColorHex))
                     .lineLimit(AppConstants.Kavithalu.cardPreviewLineLimit)
                     .padding(.top, AppConstants.Kavithalu.cardPreviewTopPadding)
-                
+
                 HStack {
                     Label("\(item.likes)", systemImage: AppConstants.Kavithalu.likesSymbol)
                         .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
                         .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
-                    
+
                     Spacer()
-                    
-                    Text(item.category)
+
+                    Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
                         .font(.system(size: AppConstants.Kavithalu.cardCategoryFontSize, weight: .semibold))
                         .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
                         .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
@@ -185,10 +195,7 @@ struct KavithaluView: View {
         .clipShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius))
         .overlay(
             RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius)
-                .stroke(
-                    Color(hex: AppConstants.Kavithalu.cardBorderColorHex),
-                    lineWidth: AppConstants.Kavithalu.cardStrokeWidth
-                )
+                .stroke(Color(hex: AppConstants.Kavithalu.cardBorderColorHex), lineWidth: AppConstants.Kavithalu.cardStrokeWidth)
         )
     }
 }
@@ -196,31 +203,42 @@ struct KavithaluView: View {
 private struct KavithaItem: Identifiable, Decodable {
     let id = UUID()
     let title: String
+    let titleTelugu: String?
     let fullKavitha: String
+    let fullKavithaTelugu: String?
     let likes: Int
     let category: String
-    
+
+    var categoryKey: String {
+        let lower = category.lowercased()
+        if lower == AppConstants.Kavithalu.Category.nature.lowercased() { return AppConstants.Kavithalu.Category.nature }
+        if lower == AppConstants.Kavithalu.Category.love.lowercased() { return AppConstants.Kavithalu.Category.love }
+        if lower == AppConstants.Kavithalu.Category.patriotic.lowercased() { return AppConstants.Kavithalu.Category.patriotic }
+        if lower == AppConstants.Kavithalu.Category.seasons.lowercased() { return AppConstants.Kavithalu.Category.seasons }
+        return AppConstants.Kavithalu.Category.all
+    }
+
     var style: KavithaStyle {
-        switch category.lowercased() {
-        case AppConstants.Kavithalu.Category.nature.lowercased():
+        switch categoryKey {
+        case AppConstants.Kavithalu.Category.nature:
             return .init(
                 symbol: AppConstants.Kavithalu.Style.natureSymbol,
                 topColorHex: AppConstants.Kavithalu.Style.natureTopColorHex,
                 bottomColorHex: AppConstants.Kavithalu.Style.natureBottomColorHex
             )
-        case AppConstants.Kavithalu.Category.patriotic.lowercased():
+        case AppConstants.Kavithalu.Category.patriotic:
             return .init(
                 symbol: AppConstants.Kavithalu.Style.patrioticSymbol,
                 topColorHex: AppConstants.Kavithalu.Style.patrioticTopColorHex,
                 bottomColorHex: AppConstants.Kavithalu.Style.patrioticBottomColorHex
             )
-        case AppConstants.Kavithalu.Category.seasons.lowercased():
+        case AppConstants.Kavithalu.Category.seasons:
             return .init(
                 symbol: AppConstants.Kavithalu.Style.seasonsSymbol,
                 topColorHex: AppConstants.Kavithalu.Style.seasonsTopColorHex,
                 bottomColorHex: AppConstants.Kavithalu.Style.seasonsBottomColorHex
             )
-        case AppConstants.Kavithalu.Category.love.lowercased():
+        case AppConstants.Kavithalu.Category.love:
             return .init(
                 symbol: AppConstants.Kavithalu.Style.loveSymbol,
                 topColorHex: AppConstants.Kavithalu.Style.loveTopColorHex,
@@ -233,6 +251,20 @@ private struct KavithaItem: Identifiable, Decodable {
                 bottomColorHex: AppConstants.Kavithalu.Style.defaultBottomColorHex
             )
         }
+    }
+
+    func title(for language: AppLanguage) -> String {
+        if language == .telugu, let titleTelugu, !titleTelugu.isEmpty {
+            return titleTelugu
+        }
+        return title
+    }
+
+    func bodyText(for language: AppLanguage) -> String {
+        if language == .telugu, let fullKavithaTelugu, !fullKavithaTelugu.isEmpty {
+            return fullKavithaTelugu
+        }
+        return fullKavitha
     }
 }
 
@@ -253,20 +285,32 @@ private extension KavithaItem {
             let items = try? JSONDecoder().decode([KavithaItem].self, from: data),
             !items.isEmpty
         else {
-            return fallback
+            return []
         }
         return items
     }
 
-    static let fallback: [KavithaItem] = []
+    func kavithaPreview(for language: AppLanguage) -> String {
+        let fullText = bodyText(for: language).trimmingCharacters(in: .whitespacesAndNewlines)
+        if let firstSentence = fullText.split(separator: AppConstants.Kavithalu.sentenceSeparator).first, !firstSentence.isEmpty {
+            return firstSentence + AppConstants.Kavithalu.ellipsis
+        }
+        let limit = AppConstants.Kavithalu.previewTrimLimit
+        if fullText.count > limit {
+            let end = fullText.index(fullText.startIndex, offsetBy: limit)
+            return String(fullText[..<end]) + AppConstants.Kavithalu.ellipsis
+        }
+        return fullText
+    }
 }
 
 @available(iOS 16.0, *)
 private struct KavithaDetailView: View {
     let item: KavithaItem
+    let language: AppLanguage
 
     private var readingMinutes: Int {
-        let wordCount = item.fullKavitha.split(whereSeparator: \.isWhitespace).count
+        let wordCount = item.bodyText(for: language).split(whereSeparator: \.isWhitespace).count
         return max(
             AppConstants.Kavithalu.minimumReadMinutes,
             (
@@ -293,11 +337,11 @@ private struct KavithaDetailView: View {
                 .frame(height: AppConstants.Kavithalu.detailHeroHeight)
                 .clipShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.detailHeroCornerRadius))
 
-                Text(item.title)
+                Text(item.title(for: language))
                     .font(.system(size: AppConstants.Kavithalu.detailTitleFontSize, weight: .bold))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.detailTitleColorHex))
 
-                Text(AppConstants.Kavithalu.authorLabel)
+                Text(AppConstants.Kavithalu.authorLabel(for: language))
                     .font(.system(size: AppConstants.Kavithalu.detailAuthorFontSize, weight: .semibold))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.detailAuthorColorHex))
 
@@ -306,7 +350,7 @@ private struct KavithaDetailView: View {
                         .font(.system(size: AppConstants.Kavithalu.detailLikesFontSize, weight: .semibold))
                         .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
 
-                    Text(item.category)
+                    Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
                         .font(.system(size: AppConstants.Kavithalu.detailMetaFontSize, weight: .semibold))
                         .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
                         .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
@@ -314,12 +358,12 @@ private struct KavithaDetailView: View {
                         .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
                         .clipShape(Capsule())
 
-                    Text("\(readingMinutes) \(AppConstants.Kavithalu.minReadSuffix)")
+                    Text("\(readingMinutes) \(AppConstants.Kavithalu.minReadSuffix(for: language))")
                         .font(.system(size: AppConstants.Kavithalu.detailMetaFontSize, weight: .medium))
                         .foregroundColor(Color(hex: AppConstants.Kavithalu.detailMetaColorHex))
                 }
 
-                Text(item.fullKavitha)
+                Text(item.bodyText(for: language))
                     .font(.system(size: AppConstants.Kavithalu.detailBodyFontSize))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.detailBodyColorHex))
                     .lineSpacing(AppConstants.Kavithalu.detailLineSpacing)
@@ -328,21 +372,6 @@ private struct KavithaDetailView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private extension KavithaItem {
-    var kavithaPreview: String {
-        let trimmed = fullKavitha.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let firstSentence = trimmed.split(separator: AppConstants.Kavithalu.sentenceSeparator).first, !firstSentence.isEmpty {
-            return firstSentence + AppConstants.Kavithalu.ellipsis
-        }
-        let limit = AppConstants.Kavithalu.previewTrimLimit
-        if trimmed.count > limit {
-            let end = trimmed.index(trimmed.startIndex, offsetBy: limit)
-            return String(trimmed[..<end]) + AppConstants.Kavithalu.ellipsis
-        }
-        return trimmed
     }
 }
 

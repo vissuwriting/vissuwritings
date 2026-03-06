@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct SignupView: View {
     
+    @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
@@ -22,6 +23,10 @@ struct SignupView: View {
         case email
         case password
         case confirmPassword
+    }
+
+    private var language: AppLanguage {
+        AppLanguage.from(selectedLanguage)
     }
     
     var body: some View {
@@ -36,7 +41,7 @@ struct SignupView: View {
                 .opacity(AppConstants.Signup.patternOpacity)
                 .ignoresSafeArea()
 
-           // brandHeader
+            brandHeader
             
             VStack(spacing: AppConstants.Signup.rootStackSpacing) {
                 
@@ -61,7 +66,7 @@ extension SignupView {
         VStack(spacing: AppConstants.Brand.contentSpacing) {
             VStack(spacing: AppConstants.Brand.titleSpacing) {
                 HStack(spacing: 8) {
-                    Text(AppConstants.Brand.primaryTitle)
+                    Text(AppConstants.Brand.primaryTitle(for: language))
                         .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(
@@ -84,7 +89,7 @@ extension SignupView {
                         )
                 }
 
-                Text(AppConstants.Brand.secondaryTitle)
+                Text(AppConstants.Brand.secondaryTitle(for: language))
                     .font(.system(size: AppConstants.Brand.secondaryFontSize, weight: .semibold, design: .serif))
                     .italic()
                     .kerning(AppConstants.Brand.secondaryKerning)
@@ -111,14 +116,14 @@ extension SignupView {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: AppConstants.Signup.titleSpacing) {
                 
-                Text(AppConstants.Signup.title)
+                Text(AppConstants.Signup.title(for: language))
                     .font(.system(size: AppConstants.Signup.headerFontSize, weight: .bold))
                 
                 
                 /// Name
                 capsuleField(
                     icon: AppConstants.Signup.nameIcon,
-                    placeholder: AppConstants.Signup.namePlaceholder,
+                    placeholder: AppConstants.Signup.namePlaceholder(for: language),
                     text: $name
                 )
                 .focused($focusedField, equals: .name)
@@ -127,7 +132,7 @@ extension SignupView {
                 /// Email
                 capsuleField(
                     icon: AppConstants.Signup.emailIcon,
-                    placeholder: AppConstants.Signup.emailPlaceholder,
+                    placeholder: AppConstants.Signup.emailPlaceholder(for: language),
                     text: $email
                 )
                 .focused($focusedField, equals: .email)
@@ -136,7 +141,7 @@ extension SignupView {
                 /// Password
                 secureCapsuleField(
                     icon: AppConstants.Signup.passwordIcon,
-                    placeholder: AppConstants.Signup.passwordPlaceholder,
+                    placeholder: AppConstants.Signup.passwordPlaceholder(for: language),
                     text: $password
                 )
                 .focused($focusedField, equals: .password)
@@ -145,7 +150,7 @@ extension SignupView {
                 /// Confirm Password
                 secureCapsuleField(
                     icon: AppConstants.Signup.confirmPasswordIcon,
-                    placeholder: AppConstants.Signup.confirmPasswordPlaceholder,
+                    placeholder: AppConstants.Signup.confirmPasswordPlaceholder(for: language),
                     text: $confirmPassword
                 )
                 .focused($focusedField, equals: .confirmPassword)
@@ -157,7 +162,7 @@ extension SignupView {
                     print(AppConstants.Signup.signupTappedLog)
                 } label: {
                     
-                    Text(AppConstants.Signup.createAccountTitle)
+                    Text(AppConstants.Signup.createAccountTitle(for: language))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -177,10 +182,10 @@ extension SignupView {
                     
                     Spacer()
                     
-                    Text(AppConstants.Signup.alreadyHaveAccountTitle)
+                    Text(AppConstants.Signup.alreadyHaveAccountTitle(for: language))
                         .foregroundColor(AppConstants.Signup.bottomTextColor)
                     
-                    Text(AppConstants.Signup.signInTitle)
+                    Text(AppConstants.Signup.signInTitle(for: language))
                         .foregroundColor(AppConstants.Signup.backgroundColor)
                         .fontWeight(.semibold)
                         .onTapGesture {

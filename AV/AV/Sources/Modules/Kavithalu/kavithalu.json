@@ -1,25 +1,33 @@
 [
   {
     "title": "Nee Aakasham",
+    "titleTelugu": "నీ ఆకాశం",
     "fullKavitha": "Nee akkada chupina navvu naa hrudayam lo inka alaage undi. Gaalilo tirige pratibimbam laaga nee gurtulu prati saayantram tirigi vastunnayi. Prati varsham boondalo nee maata vintunna anipistundi.",
+    "fullKavithaTelugu": "నీ అక్కడ చూపిన నవ్వు నా హృదయంలో ఇంకా అలాగే ఉంది. గాలిలో తిరిగే ప్రతిబింబంలా నీ జ్ఞాపకాలు ప్రతి సాయంత్రం తిరిగి వస్తున్నాయి. ప్రతి వర్షపు బొట్టులో నీ మాట వినిపిస్తున్నట్టు అనిపిస్తుంది.",
     "likes": 234,
     "category": "Nature"
   },
   {
     "title": "Mabbuloni Velugu",
+    "titleTelugu": "మబ్బులోని వెలుగు",
     "fullKavitha": "Poddune velugu laanti maatallo jeevitham ki kottha sneham. Mabbullo kuda kanipinche velugu laaga manchi alochanalu manasuni prakaashistayi. Oka sari navvite prapancham motham kotha rangullo merustundi.",
+    "fullKavithaTelugu": "పొద్దున వెలుగులాంటి మాటల్లో జీవితానికి కొత్త స్నేహం ఉంటుంది. మబ్బుల మధ్యలో కనిపించే వెలుగులా మంచి ఆలోచనలు మనసుని ప్రకాశింపజేస్తాయి. ఒకసారి నవ్వితే ప్రపంచం మొత్తం కొత్త రంగుల్లో మెరిసిపోతుంది.",
     "likes": 512,
     "category": "Patriotic"
   },
   {
     "title": "Varsham Paata",
+    "titleTelugu": "వర్షం పాట",
     "fullKavitha": "Gaalilo paata, varshamlo maataki artham kanipinche samayam idi. Meghalu padina prathi chota bhoomi kotha gundello palukuthundi. Ee raatri tholakari paata lo prematho kalisina jnapakalu unnayi.",
+    "fullKavithaTelugu": "గాలిలో పాట, వర్షంలో మాటకి అర్థం కనిపించే సమయం ఇది. మేఘాలు కురిసిన ప్రతి చోట భూమి కొత్త గుండెతో పలుకుతుంది. ఈ రాత్రి తొలకరి పాటలో ప్రేమతో కలిసిన జ్ఞాపకాలు ఉన్నాయి.",
     "likes": 189,
     "category": "Seasons"
   },
   {
     "title": "Prema Kadha",
+    "titleTelugu": "ప్రేమ కథ",
     "fullKavitha": "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu. Oka chinna choopu lo pedda prapancham untundi. Kalisi navvina kshanalu kalam daggara nilichipoye gnapakalu avuthayi.",
+    "fullKavithaTelugu": "చేతి పట్టుకుని నడిచే దారిలో ప్రేమ మాటలు మరవవు. ఒక చిన్న చూపులో పెద్ద ప్రపంచం ఉంటుంది. కలిసి నవ్విన క్షణాలు కాలం దగ్గర నిలిచిపోయే జ్ఞాపకాలవుతాయి.",
     "likes": 678,
     "category": "Love"
   }

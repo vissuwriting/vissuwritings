@@ -9,10 +9,27 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct UserProfileView: View {
-    private let name = "Satya"
-    private let email = "satya.writings@gmail.com"
-    @State private var selectedLanguage = "English"
-    private let languages = ["English", "Telugu"]
+    @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
+    
+    private var language: AppLanguage {
+        AppLanguage.from(selectedLanguage)
+    }
+    
+    private var name: String {
+        language == .telugu ? "సత్య" : "Satya"
+    }
+    
+    private var email: String {
+        language == .telugu ? "సత్య.రచనలు@మెయిల్.కామ్" : "satya.writings@gmail.com"
+    }
+
+    private var languageTitle: String {
+        language == .telugu ? "భాష" : "Language"
+    }
+
+    private var profileTitle: String {
+        language == .telugu ? "ప్రొఫైల్" : "Profile"
+    }
     
     var body: some View {
         ZStack {
@@ -34,7 +51,7 @@ struct UserProfileView: View {
                         .foregroundColor(Color(hex: "#5B6472"))
 
                     HStack(spacing: 12) {
-                        Text("Language")
+                        Text(languageTitle)
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(hex: "#1E2A39"))
                             .lineLimit(1)
@@ -42,9 +59,9 @@ struct UserProfileView: View {
 
                         Spacer()
 
-                        Picker("Language", selection: $selectedLanguage) {
-                            ForEach(languages, id: \.self) { language in
-                                Text(language).tag(language)
+                        Picker(languageTitle, selection: $selectedLanguage) {
+                            ForEach(AppLanguage.allCases, id: \.rawValue) { option in
+                                Text(option.displayName(for: language)).tag(option.rawValue)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -67,7 +84,7 @@ struct UserProfileView: View {
                 Spacer()
             }
         }
-        .navigationTitle("Profile")
+        .navigationTitle(profileTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

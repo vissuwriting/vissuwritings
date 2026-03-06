@@ -11,6 +11,15 @@ import SwiftUI
 struct AdminView: View {
     
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
+    
+    private var language: AppLanguage {
+        AppLanguage.from(selectedLanguage)
+    }
+
+    private var titleText: String {
+        AppConstants.Dashboard.adminTabTitle(language)
+    }
     
     var body: some View {
         
@@ -20,10 +29,10 @@ struct AdminView: View {
 
                 VStack(spacing: 20) {
                     
-                    Text("Admin Screen")
+                    Text(titleText)
                         .font(.largeTitle)
                     
-                    Button("Logout") {
+                    Button(language == .telugu ? "లాగ్ అవుట్" : "Logout") {
                         isLoggedIn = false
                     }
                     .foregroundColor(.red)

@@ -7,25 +7,67 @@
 
 import SwiftUI
 
+enum AppLanguage: String, CaseIterable {
+    case english = "English"
+    case telugu = "Telugu"
+
+    static func from(_ rawValue: String) -> AppLanguage {
+        if let exact = AppLanguage(rawValue: rawValue) {
+            return exact
+        }
+
+        let normalized = rawValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        switch normalized {
+        case "english", "en", "ఇంగ్లీష్":
+            return .english
+        case "telugu", "te", "తెలుగు":
+            return .telugu
+        default:
+            return .english
+        }
+    }
+
+    func displayName(for interfaceLanguage: AppLanguage) -> String {
+        switch (self, interfaceLanguage) {
+        case (.english, .telugu): return "ఇంగ్లీష్"
+        case (.telugu, .telugu): return "తెలుగు"
+        case (.english, .english): return "English"
+        case (.telugu, .english): return "Telugu"
+        }
+    }
+}
+
 enum AppConstants {
+    static let languageStorageKey = "selectedLanguage"
+
     enum Kavithalu {
         static let jsonFileName = "kavithalu"
-        static let defaultSelectedCategory = "All"
-        static let initialPositiveTip = "Your words can light up someone's day."
-        static let categories = ["All", "Nature", "Love", "Patriotic", "Seasons"]
-        static let positiveTips = [
+        static let defaultSelectedCategory = Category.all
+        static let initialPositiveTip = ""
+        static let categoryKeys = [Category.all, Category.nature, Category.love, Category.patriotic, Category.seasons]
+        static let positiveTipsEnglish = [
             "Your writing has power. Keep going.",
             "One good thought can change your whole day.",
             "Small progress in writing is still big progress.",
             "Your voice matters. Share it with confidence.",
             "Create from the heart and let it flow."
         ]
+        static let positiveTipsTelugu = [
+            "మీ రచనలో బలం ఉంది. అలాగే ముందుకు వెళ్లండి.",
+            "ఒక మంచి ఆలోచన మీ రోజును మార్చగలదు.",
+            "చిన్న పురోగతి కూడా పెద్ద విజయం.",
+            "మీ స్వరం ముఖ్యం. ధైర్యంగా పంచుకోండి.",
+            "హృదయం నుంచి రాయండి, ప్రవాహంలా సాగండి."
+        ]
 
         static let emptyStateMessagePrefix = "No related kavithalu in "
         static let emptyStateMessageSuffix = "."
-        static let greetingTitle = "Good Evening...!"
-        static let authorLabel = "By Vissu"
-        static let minReadSuffix = "min read"
+        static let greetingTitleEnglish = "Good Evening...!"
+        static let greetingTitleTelugu = "శుభ సాయంత్రం...!"
+        static let authorLabelEnglish = "By Vissu"
+        static let authorLabelTelugu = "విస్సు రచన"
+        static let minReadSuffixEnglish = "min read"
+        static let minReadSuffixTelugu = "నిమిషాల చదువు"
         static let jsonFileExtension = "json"
         static let sentenceSeparator: Character = "."
         static let ellipsis = "..."
@@ -140,6 +182,43 @@ enum AppConstants {
         static let readingWordsPerMinute = 120
         static let minimumReadMinutes = 1
         static let readingRoundUpAdjustment = 1
+
+        static func greetingTitle(for language: AppLanguage) -> String {
+            language == .telugu ? greetingTitleTelugu : greetingTitleEnglish
+        }
+
+        static func authorLabel(for language: AppLanguage) -> String {
+            language == .telugu ? authorLabelTelugu : authorLabelEnglish
+        }
+
+        static func minReadSuffix(for language: AppLanguage) -> String {
+            language == .telugu ? minReadSuffixTelugu : minReadSuffixEnglish
+        }
+
+        static func positiveTips(for language: AppLanguage) -> [String] {
+            language == .telugu ? positiveTipsTelugu : positiveTipsEnglish
+        }
+
+        static func emptyStateMessage(category: String, language: AppLanguage) -> String {
+            if language == .telugu {
+                return "\(category) లో సంబంధిత కవితలు లేవు."
+            }
+            return "No related kavithalu in \(category)."
+        }
+
+        static func categoryLabel(for key: String, language: AppLanguage) -> String {
+            if language == .telugu {
+                switch key {
+                case Category.all: return "అన్నీ"
+                case Category.nature: return "ప్రకృతి"
+                case Category.love: return "ప్రేమ"
+                case Category.patriotic: return "దేశభక్తి"
+                case Category.seasons: return "ఋతువులు"
+                default: return key
+                }
+            }
+            return key
+        }
     }
 
     enum Brand {
@@ -167,6 +246,14 @@ enum AppConstants {
         static let shadowColor = Color.black.opacity(0.18)
         static let shadowRadius: CGFloat = 8
         static let shadowYOffset: CGFloat = 3
+
+        static func primaryTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "విస్సు" : primaryTitle
+        }
+
+        static func secondaryTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "రచనలు" : secondaryTitle
+        }
     }
 
     enum Dashboard {
@@ -178,10 +265,18 @@ enum AppConstants {
         static let songsTabIcon = "music.note.list"
         static let adminTabIcon = "person.crop.circle.fill"
 
-        static let kavithaluTabTitle = "Kavithalu"
-        static let storyTabTitle = "Stories"
-        static let songsTabTitle = "Songs"
-        static let adminTabTitle = "Admin"
+        static func kavithaluTabTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? "కవితలు" : "Kavithalu"
+        }
+        static func storyTabTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? "కథలు" : "Stories"
+        }
+        static func songsTabTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? "పాటలు" : "Songs"
+        }
+        static func adminTabTitle(_ language: AppLanguage) -> String {
+            language == .telugu ? "అడ్మిన్" : "Admin"
+        }
     }
 
     enum IconPattern {
@@ -243,6 +338,34 @@ enum AppConstants {
         static let formHorizontalPadding: CGFloat = 35
         static let formTopPadding: CGFloat = 80
         static let fieldBorderLineWidth: CGFloat = 0.8
+
+        static func title(for language: AppLanguage) -> String {
+            language == .telugu ? "సైన్ ఇన్" : title
+        }
+
+        static func emailPlaceholder(for language: AppLanguage) -> String {
+            language == .telugu ? "మీ పేరు నమోదు చేయండి" : emailPlaceholder
+        }
+
+        static func passwordPlaceholder(for language: AppLanguage) -> String {
+            language == .telugu ? "మీ పాస్‌వర్డ్ నమోదు చేయండి" : passwordPlaceholder
+        }
+
+        static func loginTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "లాగిన్" : loginTitle
+        }
+
+        static func forgotPasswordTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "పాస్‌వర్డ్ మర్చిపోయారా?" : forgotPasswordTitle
+        }
+
+        static func noAccountTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "ఖాతా లేదా?" : noAccountTitle
+        }
+
+        static func signUpTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "సైన్ అప్" : signUpTitle
+        }
     }
 
     enum Signup {
@@ -281,5 +404,37 @@ enum AppConstants {
         static let buttonCornerRadius: CGFloat = 14
         static let rootStackSpacing: CGFloat = 0
         static let fieldBorderLineWidth: CGFloat = 0.5
+
+        static func title(for language: AppLanguage) -> String {
+            language == .telugu ? "సైన్ అప్" : title
+        }
+
+        static func namePlaceholder(for language: AppLanguage) -> String {
+            language == .telugu ? "మీ పేరు నమోదు చేయండి" : namePlaceholder
+        }
+
+        static func emailPlaceholder(for language: AppLanguage) -> String {
+            language == .telugu ? "మీ ఇమెయిల్ నమోదు చేయండి" : emailPlaceholder
+        }
+
+        static func passwordPlaceholder(for language: AppLanguage) -> String {
+            language == .telugu ? "పాస్‌వర్డ్ నమోదు చేయండి" : passwordPlaceholder
+        }
+
+        static func confirmPasswordPlaceholder(for language: AppLanguage) -> String {
+            language == .telugu ? "పాస్‌వర్డ్ నిర్ధారించండి" : confirmPasswordPlaceholder
+        }
+
+        static func createAccountTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "ఖాతా సృష్టించండి" : createAccountTitle
+        }
+
+        static func alreadyHaveAccountTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "ఇప్పటికే ఖాతా ఉందా?" : alreadyHaveAccountTitle
+        }
+
+        static func signInTitle(for language: AppLanguage) -> String {
+            language == .telugu ? "సైన్ ఇన్" : signInTitle
+        }
     }
 }

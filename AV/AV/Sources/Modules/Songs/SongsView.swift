@@ -9,6 +9,16 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct SongsView: View {
+    @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
+
+    private var language: AppLanguage {
+        AppLanguage.from(selectedLanguage)
+    }
+
+    private var titleText: String {
+        AppConstants.Dashboard.songsTabTitle(language)
+    }
+
     
     var body: some View {
         NavigationStack {
@@ -16,7 +26,7 @@ struct SongsView: View {
                 AppColors.background
                     .ignoresSafeArea()
 
-                Text("Songs")
+                Text(titleText)
                     .font(.largeTitle)
             }
         }
