@@ -14,6 +14,10 @@ struct KavithaluView: View {
     @State private var kavithalu: [KavithaItem] = []
     @State private var selectedCategoryKey: String = AppConstants.Kavithalu.defaultSelectedCategory
     @State private var positiveTip: String = AppConstants.Kavithalu.initialPositiveTip
+    @State private var selectedKavitha: KavithaItem?
+    @State private var isDetailActive = false
+    @State private var likedKavithaIDs: Set<UUID> = []
+    @State private var likedCounts: [UUID: Int] = [:]
 
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguageRaw)
@@ -52,12 +56,12 @@ struct KavithaluView: View {
                             .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                         } else {
                             ForEach(filteredKavithalu) { item in
-                                NavigationLink {
-                                    KavithaDetailView(item: item, language: language)
-                                } label: {
-                                    kavithaCard(item)
-                                }
-                                .buttonStyle(.plain)
+                                kavithaCard(item)
+                                    .contentShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius))
+                                    .onTapGesture {
+                                        selectedKavitha = item
+                                        isDetailActive = true
+                                    }
                             }
                         }
                     }
@@ -66,6 +70,18 @@ struct KavithaluView: View {
                     .padding(.bottom, AppConstants.Kavithalu.rootBottomPadding)
                 }
             }
+            .background(
+                NavigationLink(isActive: $isDetailActive) {
+                    if let item = selectedKavitha {
+                        KavithaDetailView(item: item, language: language)
+                    } else {
+                        EmptyView()
+                    }
+                } label: {
+                    EmptyView()
+                }
+                .hidden()
+            )
         }
         .onAppear {
             kavithalu = KavithaItem.loadFromBundle(named: AppConstants.Kavithalu.jsonFileName)
@@ -171,9 +187,14 @@ struct KavithaluView: View {
                     .padding(.top, AppConstants.Kavithalu.cardPreviewTopPadding)
 
                 HStack {
-                    Label("\(item.likes)", systemImage: AppConstants.Kavithalu.likesSymbol)
-                        .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
-                        .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
+                    Button {
+                        toggleLike(for: item)
+                    } label: {
+                        Label("\(displayLikes(for: item))", systemImage: likeSymbol(for: item))
+                            .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
+                            .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
+                    }
+                    .buttonStyle(.plain)
 
                     Spacer()
 
@@ -198,9 +219,30 @@ struct KavithaluView: View {
                 .stroke(Color(hex: AppConstants.Kavithalu.cardBorderColorHex), lineWidth: AppConstants.Kavithalu.cardStrokeWidth)
         )
     }
+
+    private func displayLikes(for item: KavithaItem) -> Int {
+        likedCounts[item.id] ?? item.likes
+    }
+
+    private func likeSymbol(for item: KavithaItem) -> String {
+        likedKavithaIDs.contains(item.id) ? AppConstants.Kavithalu.detailLikesSymbol : AppConstants.Kavithalu.likesSymbol
+    }
+
+    private func toggleLike(for item: KavithaItem) {
+        let currentlyLiked = likedKavithaIDs.contains(item.id)
+        let currentCount = displayLikes(for: item)
+
+        if currentlyLiked {
+            likedKavithaIDs.remove(item.id)
+            likedCounts[item.id] = max(0, currentCount - 1)
+        } else {
+            likedKavithaIDs.insert(item.id)
+            likedCounts[item.id] = currentCount + 1
+        }
+    }
 }
 
-private struct KavithaItem: Identifiable, Decodable {
+private struct KavithaItem: Identifiable, Decodable, Hashable {
     let id = UUID()
     let title: String
     let titleTelugu: String?
