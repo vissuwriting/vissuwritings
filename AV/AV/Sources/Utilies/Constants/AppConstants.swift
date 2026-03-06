@@ -8,6 +8,140 @@
 import SwiftUI
 
 enum AppConstants {
+    enum Kavithalu {
+        static let jsonFileName = "kavithalu"
+        static let defaultSelectedCategory = "All"
+        static let initialPositiveTip = "Your words can light up someone's day."
+        static let categories = ["All", "Nature", "Love", "Patriotic", "Seasons"]
+        static let positiveTips = [
+            "Your writing has power. Keep going.",
+            "One good thought can change your whole day.",
+            "Small progress in writing is still big progress.",
+            "Your voice matters. Share it with confidence.",
+            "Create from the heart and let it flow."
+        ]
+
+        static let emptyStateMessagePrefix = "No related kavithalu in "
+        static let emptyStateMessageSuffix = "."
+        static let greetingTitle = "Good Evening...!"
+        static let authorLabel = "By Vissu"
+        static let minReadSuffix = "min read"
+        static let jsonFileExtension = "json"
+        static let sentenceSeparator: Character = "."
+        static let ellipsis = "..."
+
+        static let avatarSymbol = "person.fill"
+        static let likesSymbol = "heart"
+        static let detailLikesSymbol = "heart.fill"
+
+        static let zeroSpacing: CGFloat = 0
+        static let rootSpacing: CGFloat = 14
+        static let horizontalChipSpacing: CGFloat = 10
+        static let rootHorizontalPadding: CGFloat = 12
+        static let rootTopPadding: CGFloat = 10
+        static let rootBottomPadding: CGFloat = 16
+        static let greetingHorizontalPadding: CGFloat = 14
+        static let greetingVerticalPadding: CGFloat = 10
+        static let greetingCornerRadius: CGFloat = 14
+        static let chipCornerRadius: CGFloat = 10
+        static let chipHorizontalPadding: CGFloat = 16
+        static let chipVerticalPadding: CGFloat = 8
+        static let chipBorderWidth: CGFloat = 1
+        static let cardHeight: CGFloat = 122
+        static let cardCornerRadius: CGFloat = 16
+        static let cardStrokeWidth: CGFloat = 1
+        static let cardImageWidth: CGFloat = 112
+        static let cardContentSpacing: CGFloat = 4
+        static let cardContentPadding: CGFloat = 12
+        static let cardPreviewTopPadding: CGFloat = 2
+        static let cardMetaTopPadding: CGFloat = 3
+        static let cardPreviewLineLimit = 2
+        static let categoryHorizontalPadding: CGFloat = 10
+        static let categoryVerticalPadding: CGFloat = 4
+        static let detailCategoryVerticalPadding: CGFloat = 5
+        static let detailContainerPadding: CGFloat = 16
+        static let detailSpacing: CGFloat = 16
+        static let detailHeroHeight: CGFloat = 180
+        static let detailHeroCornerRadius: CGFloat = 20
+        static let detailMetaSpacing: CGFloat = 10
+        static let detailLineSpacing: CGFloat = 6
+
+        static let cardImageSymbolSize: CGFloat = 24
+        static let cardTitleFontSize: CGFloat = 14
+        static let cardPreviewFontSize: CGFloat = 14
+        static let cardLikesFontSize: CGFloat = 14
+        static let cardCategoryFontSize: CGFloat = 12
+        static let chipFontSize: CGFloat = 14
+        static let emptyStateFontSize: CGFloat = 14
+        static let greetingTitleFontSize: CGFloat = 18
+        static let greetingTipFontSize: CGFloat = 14
+        static let avatarSize: CGFloat = 44
+        static let avatarIconSize: CGFloat = 22
+        static let avatarOpacity = 0.92
+        static let detailHeroSymbolSize: CGFloat = 42
+        static let detailHeroSymbolOpacity = 0.95
+        static let cardImageSymbolOpacity = 0.9
+        static let detailTitleFontSize: CGFloat = 26
+        static let detailAuthorFontSize: CGFloat = 18
+        static let detailMetaFontSize: CGFloat = 13
+        static let detailLikesFontSize: CGFloat = 14
+        static let detailBodyFontSize: CGFloat = 17
+
+        static let cardTitleColorHex = "#1E2A39"
+        static let cardPreviewColorHex = "#5B6472"
+        static let likesColorHex = "#E56B7A"
+        static let categoryTextColorHex = "#66A7DF"
+        static let categoryBackgroundColorHex = "#E8F2FC"
+        static let cardBorderColorHex = "#EDF2F8"
+        static let chipTextColorHex = "#4B5563"
+        static let chipSelectedColorHex = "#E8ECF1"
+        static let chipBorderColorHex = "#D6DCE5"
+        static let emptyStateColorHex = "#6B7280"
+        static let greetingCardColorHex = "#E6EFEB"
+        static let greetingAvatarColorHex = "#A9BEB2"
+        static let greetingTitleColorHex = "#1E2A39"
+        static let greetingTipColorHex = "#6C7A87"
+        static let detailTitleColorHex = "#1E2A39"
+        static let detailAuthorColorHex = "#5B8FCB"
+        static let detailMetaColorHex = "#728096"
+        static let detailBodyColorHex = "#334155"
+
+        enum Category {
+            static let all = "All"
+            static let nature = "Nature"
+            static let love = "Love"
+            static let patriotic = "Patriotic"
+            static let seasons = "Seasons"
+        }
+
+        enum Style {
+            static let defaultSymbol = "book.fill"
+            static let defaultTopColorHex = "#A5D6A7"
+            static let defaultBottomColorHex = "#607D8B"
+
+            static let natureSymbol = "cloud.sun.fill"
+            static let natureTopColorHex = "#6EC6FF"
+            static let natureBottomColorHex = "#2E7D32"
+
+            static let patrioticSymbol = "sunrise.fill"
+            static let patrioticTopColorHex = "#90CAF9"
+            static let patrioticBottomColorHex = "#43A047"
+
+            static let seasonsSymbol = "cloud.rain.fill"
+            static let seasonsTopColorHex = "#90A4AE"
+            static let seasonsBottomColorHex = "#546E7A"
+
+            static let loveSymbol = "heart.fill"
+            static let loveTopColorHex = "#F8BBD0"
+            static let loveBottomColorHex = "#6D4C41"
+        }
+
+        static let previewTrimLimit = 78
+        static let readingWordsPerMinute = 120
+        static let minimumReadMinutes = 1
+        static let readingRoundUpAdjustment = 1
+    }
+
     enum Brand {
         static let primaryTitle = "Vissu"
         static let secondaryTitle = "Sahithi"

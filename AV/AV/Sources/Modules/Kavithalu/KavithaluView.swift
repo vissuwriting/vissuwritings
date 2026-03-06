@@ -11,8 +11,8 @@ import SwiftUI
 struct KavithaluView: View {
     
     @State private var kavithalu: [KavithaItem] = KavithaItem.fallback
-    @State private var selectedCategory: String = "All"
-    private let categories: [String] = ["All", "Nature", "Love", "Patriotic", "Seasons"]
+    @State private var selectedCategory: String = AppConstants.Kavithalu.defaultSelectedCategory
+    @State private var positiveTip: String = AppConstants.Kavithalu.initialPositiveTip
     
     var body: some View {
         NavigationStack {
@@ -21,22 +21,28 @@ struct KavithaluView: View {
                     .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 14) {
+                    VStack(spacing: AppConstants.Kavithalu.rootSpacing) {
+                        greetingsView
+                        
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 10) {
-                                ForEach(categories, id: \.self) { category in
+                            HStack(spacing: AppConstants.Kavithalu.horizontalChipSpacing) {
+                                ForEach(AppConstants.Kavithalu.categories, id: \.self) { category in
                                     categoryChip(category)
                                 }
                             }
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                         }
                         
                         if filteredKavithalu.isEmpty {
-                            Text("No related kavithalu in \(selectedCategory).")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(Color(hex: "#6B7280"))
+                            Text(
+                                AppConstants.Kavithalu.emptyStateMessagePrefix +
+                                selectedCategory +
+                                AppConstants.Kavithalu.emptyStateMessageSuffix
+                            )
+                                .font(.system(size: AppConstants.Kavithalu.emptyStateFontSize, weight: .medium))
+                                .foregroundColor(Color(hex: AppConstants.Kavithalu.emptyStateColorHex))
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 12)
+                                .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
                         } else {
                             ForEach(filteredKavithalu) { item in
                                 NavigationLink {
@@ -48,19 +54,57 @@ struct KavithaluView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 10)
-                    .padding(.bottom, 16)
+                    .padding(.horizontal, AppConstants.Kavithalu.rootHorizontalPadding)
+                    .padding(.top, AppConstants.Kavithalu.rootTopPadding)
+                    .padding(.bottom, AppConstants.Kavithalu.rootBottomPadding)
                 }
             }
         }
         .onAppear {
-            kavithalu = KavithaItem.loadFromBundle(named: "kavithalu")
+            kavithalu = KavithaItem.loadFromBundle(named: AppConstants.Kavithalu.jsonFileName)
+            positiveTip = AppConstants.Kavithalu.positiveTips.randomElement() ?? positiveTip
         }
     }
     
+    private var greetingsView: some View {
+        HStack(spacing: AppConstants.Kavithalu.cardContentPadding) {
+            NavigationLink {
+                UserProfileView()
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: AppConstants.Kavithalu.greetingAvatarColorHex))
+                        .frame(width: AppConstants.Kavithalu.avatarSize, height: AppConstants.Kavithalu.avatarSize)
+                    
+                    Image(systemName: AppConstants.Kavithalu.avatarSymbol)
+                        .font(.system(size: AppConstants.Kavithalu.avatarIconSize, weight: .semibold))
+                        .foregroundColor(.white.opacity(AppConstants.Kavithalu.avatarOpacity))
+                }
+            }
+            .buttonStyle(.plain)
+            
+            VStack(alignment: .leading, spacing: AppConstants.Kavithalu.cardContentSpacing) {
+                Text(AppConstants.Kavithalu.greetingTitle)
+                    .font(.system(size: AppConstants.Kavithalu.greetingTitleFontSize, weight: .bold))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.greetingTitleColorHex))
+                
+                Text(positiveTip)
+                    .font(.system(size: AppConstants.Kavithalu.greetingTipFontSize, weight: .medium))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.greetingTipColorHex))
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, AppConstants.Kavithalu.greetingHorizontalPadding)
+        .padding(.vertical, AppConstants.Kavithalu.greetingVerticalPadding)
+        .background(
+            RoundedRectangle(cornerRadius: AppConstants.Kavithalu.greetingCornerRadius)
+                .fill(Color(hex: AppConstants.Kavithalu.greetingCardColorHex))
+        )
+    }
+    
     private var filteredKavithalu: [KavithaItem] {
-        if selectedCategory == "All" { return kavithalu }
+        if selectedCategory == AppConstants.Kavithalu.Category.all { return kavithalu }
         return kavithalu.filter { $0.category.caseInsensitiveCompare(selectedCategory) == .orderedSame }
     }
     
@@ -71,24 +115,27 @@ struct KavithaluView: View {
             selectedCategory = category
         } label: {
             Text(category)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Color(hex: "#4B5563"))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .font(.system(size: AppConstants.Kavithalu.chipFontSize, weight: .medium))
+                .foregroundColor(Color(hex: AppConstants.Kavithalu.chipTextColorHex))
+                .padding(.horizontal, AppConstants.Kavithalu.chipHorizontalPadding)
+                .padding(.vertical, AppConstants.Kavithalu.chipVerticalPadding)
                 .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(selected ? Color(hex: "#E8ECF1") : Color.clear)
+                    RoundedRectangle(cornerRadius: AppConstants.Kavithalu.chipCornerRadius)
+                        .fill(selected ? Color(hex: AppConstants.Kavithalu.chipSelectedColorHex) : Color.clear)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color(hex: "#D6DCE5"), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: AppConstants.Kavithalu.chipCornerRadius)
+                        .stroke(
+                            Color(hex: AppConstants.Kavithalu.chipBorderColorHex),
+                            lineWidth: AppConstants.Kavithalu.chipBorderWidth
+                        )
                 )
         }
         .buttonStyle(.plain)
     }
     
     private func kavithaCard(_ item: KavithaItem) -> some View {
-        HStack(alignment: .top, spacing: 0) {
+        HStack(alignment: .top, spacing: AppConstants.Kavithalu.zeroSpacing) {
             ZStack {
                 LinearGradient(
                     colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
@@ -97,48 +144,51 @@ struct KavithaluView: View {
                 )
                 
                 Image(systemName: item.style.symbol)
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.system(size: AppConstants.Kavithalu.cardImageSymbolSize, weight: .semibold))
+                    .foregroundColor(.white.opacity(AppConstants.Kavithalu.cardImageSymbolOpacity))
             }
-            .frame(width: 112)
+            .frame(width: AppConstants.Kavithalu.cardImageWidth)
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: AppConstants.Kavithalu.cardContentSpacing) {
                 Text(item.title)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(hex: "#1E2A39"))
+                    .font(.system(size: AppConstants.Kavithalu.cardTitleFontSize, weight: .bold))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.cardTitleColorHex))
                 
                 Text(item.kavithaPreview)
-                    .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "#5B6472"))
-                    .lineLimit(2)
-                    .padding(.top, 2)
+                    .font(.system(size: AppConstants.Kavithalu.cardPreviewFontSize))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.cardPreviewColorHex))
+                    .lineLimit(AppConstants.Kavithalu.cardPreviewLineLimit)
+                    .padding(.top, AppConstants.Kavithalu.cardPreviewTopPadding)
                 
                 HStack {
-                    Label("\(item.likes)", systemImage: "heart")
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "#E56B7A"))
+                    Label("\(item.likes)", systemImage: AppConstants.Kavithalu.likesSymbol)
+                        .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
+                        .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
                     
                     Spacer()
                     
                     Text(item.category)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color(hex: "#66A7DF"))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Color(hex: "#E8F2FC"))
+                        .font(.system(size: AppConstants.Kavithalu.cardCategoryFontSize, weight: .semibold))
+                        .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
+                        .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
+                        .padding(.vertical, AppConstants.Kavithalu.categoryVerticalPadding)
+                        .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
                         .clipShape(Capsule())
                 }
-                .padding(.top, 3)
+                .padding(.top, AppConstants.Kavithalu.cardMetaTopPadding)
             }
-            .padding(12)
+            .padding(AppConstants.Kavithalu.cardContentPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(height: 122)
+        .frame(height: AppConstants.Kavithalu.cardHeight)
         .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color(hex: "#EDF2F8"), lineWidth: 1)
+            RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius)
+                .stroke(
+                    Color(hex: AppConstants.Kavithalu.cardBorderColorHex),
+                    lineWidth: AppConstants.Kavithalu.cardStrokeWidth
+                )
         )
     }
 }
@@ -152,16 +202,36 @@ private struct KavithaItem: Identifiable, Decodable {
     
     var style: KavithaStyle {
         switch category.lowercased() {
-        case "nature":
-            return .init(symbol: "cloud.sun.fill", topColorHex: "#6EC6FF", bottomColorHex: "#2E7D32")
-        case "patriotic":
-            return .init(symbol: "sunrise.fill", topColorHex: "#90CAF9", bottomColorHex: "#43A047")
-        case "seasons":
-            return .init(symbol: "cloud.rain.fill", topColorHex: "#90A4AE", bottomColorHex: "#546E7A")
-        case "love":
-            return .init(symbol: "heart.fill", topColorHex: "#F8BBD0", bottomColorHex: "#6D4C41")
+        case AppConstants.Kavithalu.Category.nature.lowercased():
+            return .init(
+                symbol: AppConstants.Kavithalu.Style.natureSymbol,
+                topColorHex: AppConstants.Kavithalu.Style.natureTopColorHex,
+                bottomColorHex: AppConstants.Kavithalu.Style.natureBottomColorHex
+            )
+        case AppConstants.Kavithalu.Category.patriotic.lowercased():
+            return .init(
+                symbol: AppConstants.Kavithalu.Style.patrioticSymbol,
+                topColorHex: AppConstants.Kavithalu.Style.patrioticTopColorHex,
+                bottomColorHex: AppConstants.Kavithalu.Style.patrioticBottomColorHex
+            )
+        case AppConstants.Kavithalu.Category.seasons.lowercased():
+            return .init(
+                symbol: AppConstants.Kavithalu.Style.seasonsSymbol,
+                topColorHex: AppConstants.Kavithalu.Style.seasonsTopColorHex,
+                bottomColorHex: AppConstants.Kavithalu.Style.seasonsBottomColorHex
+            )
+        case AppConstants.Kavithalu.Category.love.lowercased():
+            return .init(
+                symbol: AppConstants.Kavithalu.Style.loveSymbol,
+                topColorHex: AppConstants.Kavithalu.Style.loveTopColorHex,
+                bottomColorHex: AppConstants.Kavithalu.Style.loveBottomColorHex
+            )
         default:
-            return .init(symbol: "book.fill", topColorHex: "#A5D6A7", bottomColorHex: "#607D8B")
+            return .init(
+                symbol: AppConstants.Kavithalu.Style.defaultSymbol,
+                topColorHex: AppConstants.Kavithalu.Style.defaultTopColorHex,
+                bottomColorHex: AppConstants.Kavithalu.Style.defaultBottomColorHex
+            )
         }
     }
 }
@@ -175,7 +245,10 @@ private struct KavithaStyle {
 private extension KavithaItem {
     static func loadFromBundle(named fileName: String) -> [KavithaItem] {
         guard
-            let url = Bundle.main.url(forResource: fileName, withExtension: "json"),
+            let url = Bundle.main.url(
+                forResource: fileName,
+                withExtension: AppConstants.Kavithalu.jsonFileExtension
+            ),
             let data = try? Data(contentsOf: url),
             let items = try? JSONDecoder().decode([KavithaItem].self, from: data),
             !items.isEmpty
@@ -185,32 +258,7 @@ private extension KavithaItem {
         return items
     }
 
-    static let fallback: [KavithaItem] = [
-        .init(
-            title: "Nee Aakasham",
-            fullKavitha: "Nee akkada chupina navvu naa hrudayam lo inka alaage undi. Gaalilo tirige pratibimbam laaga nee gurtulu prati saayantram tirigi vastunnayi. Prati varsham boondalo nee maata vintunna anipistundi.",
-            likes: 234,
-            category: "Nature"
-        ),
-        .init(
-            title: "Mabbuloni Velugu",
-            fullKavitha: "Poddune velugu laanti maatallo jeevitham ki kottha sneham. Mabbullo kuda kanipinche velugu laaga manchi alochanalu manasuni prakaashistayi. Oka sari navvite prapancham motham kotha rangullo merustundi.",
-            likes: 512,
-            category: "Patriotic"
-        ),
-        .init(
-            title: "Varsham Paata",
-            fullKavitha: "Gaalilo paata, varshamlo maataki artham kanipinche samayam idi. Meghalu padina prathi chota bhoomi kotha gundello palukuthundi. Ee raatri tholakari paata lo prematho kalisina jnapakalu unnayi.",
-            likes: 189,
-            category: "Seasons"
-        ),
-        .init(
-            title: "Prema Kadha",
-            fullKavitha: "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu. Oka chinna choopu lo pedda prapancham untundi. Kalisi navvina kshanalu kalam daggara nilichipoye gnapakalu avuthayi.",
-            likes: 678,
-            category: "Love"
-        )
-    ]
+    static let fallback: [KavithaItem] = []
 }
 
 @available(iOS 16.0, *)
@@ -218,12 +266,19 @@ private struct KavithaDetailView: View {
     let item: KavithaItem
 
     private var readingMinutes: Int {
-        max(1, (item.fullKavitha.split(separator: " ").count + 119) / 120)
+        let wordCount = item.fullKavitha.split(whereSeparator: \.isWhitespace).count
+        return max(
+            AppConstants.Kavithalu.minimumReadMinutes,
+            (
+                wordCount +
+                (AppConstants.Kavithalu.readingWordsPerMinute - AppConstants.Kavithalu.readingRoundUpAdjustment)
+            ) / AppConstants.Kavithalu.readingWordsPerMinute
+        )
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: AppConstants.Kavithalu.detailSpacing) {
                 ZStack {
                     LinearGradient(
                         colors: [Color(hex: item.style.topColorHex), Color(hex: item.style.bottomColorHex)],
@@ -232,44 +287,44 @@ private struct KavithaDetailView: View {
                     )
 
                     Image(systemName: item.style.symbol)
-                        .font(.system(size: 42, weight: .bold))
-                        .foregroundColor(.white.opacity(0.95))
+                        .font(.system(size: AppConstants.Kavithalu.detailHeroSymbolSize, weight: .bold))
+                        .foregroundColor(.white.opacity(AppConstants.Kavithalu.detailHeroSymbolOpacity))
                 }
-                .frame(height: 180)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .frame(height: AppConstants.Kavithalu.detailHeroHeight)
+                .clipShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.detailHeroCornerRadius))
 
                 Text(item.title)
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(Color(hex: "#1E2A39"))
+                    .font(.system(size: AppConstants.Kavithalu.detailTitleFontSize, weight: .bold))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.detailTitleColorHex))
 
-                Text("By Vissu")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Color(hex: "#5B8FCB"))
+                Text(AppConstants.Kavithalu.authorLabel)
+                    .font(.system(size: AppConstants.Kavithalu.detailAuthorFontSize, weight: .semibold))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.detailAuthorColorHex))
 
-                HStack(spacing: 10) {
-                    Label("\(item.likes)", systemImage: "heart.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color(hex: "#E56B7A"))
+                HStack(spacing: AppConstants.Kavithalu.detailMetaSpacing) {
+                    Label("\(item.likes)", systemImage: AppConstants.Kavithalu.detailLikesSymbol)
+                        .font(.system(size: AppConstants.Kavithalu.detailLikesFontSize, weight: .semibold))
+                        .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
 
                     Text(item.category)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(hex: "#66A7DF"))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Color(hex: "#E8F2FC"))
+                        .font(.system(size: AppConstants.Kavithalu.detailMetaFontSize, weight: .semibold))
+                        .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
+                        .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
+                        .padding(.vertical, AppConstants.Kavithalu.detailCategoryVerticalPadding)
+                        .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
                         .clipShape(Capsule())
 
-                    Text("\(readingMinutes) min read")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Color(hex: "#728096"))
+                    Text("\(readingMinutes) \(AppConstants.Kavithalu.minReadSuffix)")
+                        .font(.system(size: AppConstants.Kavithalu.detailMetaFontSize, weight: .medium))
+                        .foregroundColor(Color(hex: AppConstants.Kavithalu.detailMetaColorHex))
                 }
 
                 Text(item.fullKavitha)
-                    .font(.system(size: 17))
-                    .foregroundColor(Color(hex: "#334155"))
-                    .lineSpacing(6)
+                    .font(.system(size: AppConstants.Kavithalu.detailBodyFontSize))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.detailBodyColorHex))
+                    .lineSpacing(AppConstants.Kavithalu.detailLineSpacing)
             }
-            .padding(16)
+            .padding(AppConstants.Kavithalu.detailContainerPadding)
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
@@ -279,13 +334,13 @@ private struct KavithaDetailView: View {
 private extension KavithaItem {
     var kavithaPreview: String {
         let trimmed = fullKavitha.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let firstSentence = trimmed.split(separator: ".").first, !firstSentence.isEmpty {
-            return firstSentence + "..."
+        if let firstSentence = trimmed.split(separator: AppConstants.Kavithalu.sentenceSeparator).first, !firstSentence.isEmpty {
+            return firstSentence + AppConstants.Kavithalu.ellipsis
         }
-        let limit = 78
+        let limit = AppConstants.Kavithalu.previewTrimLimit
         if trimmed.count > limit {
             let end = trimmed.index(trimmed.startIndex, offsetBy: limit)
-            return String(trimmed[..<end]) + "..."
+            return String(trimmed[..<end]) + AppConstants.Kavithalu.ellipsis
         }
         return trimmed
     }
