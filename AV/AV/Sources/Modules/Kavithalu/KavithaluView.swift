@@ -56,10 +56,6 @@ struct KavithaluView: View {
                     .font(.system(size: 23, weight: .bold))
                     .foregroundColor(Color(hex: "#1E2A39"))
                 
-                Text(item.author)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(Color(hex: "#5B8FCB"))
-                
                 Text(item.preview)
                     .font(.system(size: 14))
                     .foregroundColor(Color(hex: "#5B6472"))
@@ -96,9 +92,8 @@ struct KavithaluView: View {
 }
 
 private struct KavithaItem: Identifiable, Decodable {
-    var id: String { "\(title)-\(author)" }
+    var id: String { "\(title)" }
     let title: String
-    let author: String
     let preview: String
     let likes: Int
     let category: String
@@ -141,28 +136,24 @@ private extension KavithaItem {
     static let fallback: [KavithaItem] = [
         .init(
             title: "Nee Aakasham",
-            author: "Vissu",
             preview: "Nee akkada chupina navvu naa hrudayam lo inka alaage undi...",
             likes: 234,
             category: "Nature"
         ),
         .init(
             title: "Mabbuloni Velugu",
-            author: "Vissu",
             preview: "Poddune velugu laanti maatallo jeevitham ki kottha sneham...",
             likes: 512,
             category: "Patriotic"
         ),
         .init(
             title: "Varsham Paata",
-            author: "Vissu",
             preview: "Gaalilo paata, varshamlo maataki artham kanipinche samayam...",
             likes: 189,
             category: "Seasons"
         ),
         .init(
             title: "Prema Kadha",
-            author: "Vissu",
             preview: "Cheyi pattukoni nadiche daari lo prema maatalu marichipovu...",
             likes: 678,
             category: "Love"
