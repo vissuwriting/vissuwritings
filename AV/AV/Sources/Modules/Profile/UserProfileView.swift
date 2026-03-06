@@ -9,6 +9,7 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct UserProfileView: View {
+    @AppStorage("isLoggedIn") private var isLoggedIn = true
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     
     private var language: AppLanguage {
@@ -29,6 +30,10 @@ struct UserProfileView: View {
 
     private var profileTitle: String {
         language == .telugu ? "ప్రొఫైల్" : "Profile"
+    }
+
+    private var logoutTitle: String {
+        language == .telugu ? "లాగ్ అవుట్" : "Logout"
     }
     
     var body: some View {
@@ -77,6 +82,16 @@ struct UserProfileView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color(hex: "#E2E8F0"), lineWidth: 1)
                     )
+
+                    Button(logoutTitle) {
+                        isLoggedIn = false
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.red)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding(.top, 24)
                 .padding(.horizontal, 24)

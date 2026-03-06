@@ -10,7 +10,6 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct AdminView: View {
     
-    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     
     private var language: AppLanguage {
@@ -31,11 +30,6 @@ struct AdminView: View {
                     
                     Text(titleText)
                         .font(.largeTitle)
-                    
-                    Button(language == .telugu ? "లాగ్ అవుట్" : "Logout") {
-                        isLoggedIn = false
-                    }
-                    .foregroundColor(.red)
                 }
             }
         }
