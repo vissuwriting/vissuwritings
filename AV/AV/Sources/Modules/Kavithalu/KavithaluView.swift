@@ -154,6 +154,10 @@ struct KavithaluView: View {
             RoundedRectangle(cornerRadius: AppConstants.Kavithalu.greetingCornerRadius)
                 .fill(Color(hex: AppConstants.Kavithalu.greetingCardColorHex))
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: AppConstants.Kavithalu.greetingCornerRadius)
+                .stroke(Color(hex: AppConstants.Kavithalu.greetingBorderColorHex), lineWidth: AppConstants.Kavithalu.greetingBorderWidth)
+        )
     }
 
     private var filteredKavithalu: [KavithaItem] {

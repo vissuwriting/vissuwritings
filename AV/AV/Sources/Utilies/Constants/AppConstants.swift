@@ -92,6 +92,7 @@ enum AppConstants {
         static let greetingHorizontalPadding: CGFloat = 14
         static let greetingVerticalPadding: CGFloat = 10
         static let greetingCornerRadius: CGFloat = 14
+        static let greetingBorderWidth: CGFloat = 1
         static let chipCornerRadius: CGFloat = 10
         static let chipHorizontalPadding: CGFloat = 16
         static let chipVerticalPadding: CGFloat = 8
@@ -141,12 +142,13 @@ enum AppConstants {
         static let likesColorHex = "#E56B7A"
         static let categoryTextColorHex = "#66A7DF"
         static let categoryBackgroundColorHex = "#E8F2FC"
-        static let cardBorderColorHex = "#EDF2F8"
+        static let cardBorderColorHex = "#DCE5EE"
         static let chipTextColorHex = "#4B5563"
         static let chipSelectedColorHex = "#E8ECF1"
         static let chipBorderColorHex = "#D6DCE5"
         static let emptyStateColorHex = "#6B7280"
         static let greetingCardColorHex = "#E6EFEB"
+        static let greetingBorderColorHex = "#D3DED8"
         static let greetingAvatarColorHex = "#A9BEB2"
         static let greetingTitleColorHex = "#1E2A39"
         static let greetingTipColorHex = "#6C7A87"
