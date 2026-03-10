@@ -1,0 +1,57 @@
+[
+  {
+    "title": "Sri Anjaneyam",
+    "titleTelugu": "శ్రీ ఆంజనేయం",
+    "genre": "Devotional",
+    "genreTelugu": "భక్తి",
+    "lyrics": "Hanumantha nee namam palikina prathi nimisham lo dhairyam perugutundi. Nee daya naa daari ki velugu.",
+    "lyricsTelugu": "హనుమంతా నీ నామం పలికిన ప్రతి నిమిషంలో ధైర్యం పెరుగుతుంది. నీ దయ నా దారికి వెలుగు.",
+    "duration": "0:15",
+    "imageURL": "https://picsum.photos/id/444/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-15s.mp3"
+  },
+  {
+    "title": "Vennela Ratri",
+    "titleTelugu": "వెన్నెల రాత్రి",
+    "genre": "Patriotic",
+    "genreTelugu": "దేశభక్తి",
+    "lyrics": "Vennela ratri lo mana jenda chayalu gaali tho aadutunte hrudayam garvamtho nindutundi.",
+    "lyricsTelugu": "వెన్నెల రాత్రిలో మన జెండా ఛాయలు గాలితో ఆడుతుంటే హృదయం గర్వంతో నిండుతుంది.",
+    "duration": "0:12",
+    "imageURL": "https://picsum.photos/id/250/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-12s.mp3"
+  },
+  {
+    "title": "Raga Tarangam",
+    "titleTelugu": "రాగ తరంగం",
+    "genre": "Classical",
+    "genreTelugu": "శాస్త్రీయ",
+    "lyrics": "Ragame pranam ayi palikithe manasu theeram cheruthundi. Swara tharangaalu kalalni kuda melukolputhayi.",
+    "lyricsTelugu": "రాగమే ప్రాణమై పలికితే మనసు తీరానికి చేరుతుంది. స్వర తరంగాలు కలల్ని కూడా మేల్కొలుపుతాయి.",
+    "duration": "0:09",
+    "imageURL": "https://picsum.photos/id/10/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-9s.mp3"
+  },
+  {
+    "title": "Mallipulu",
+    "titleTelugu": "మల్లిపూలు",
+    "genre": "Folk",
+    "genreTelugu": "జానపదం",
+    "lyrics": "Mallipoola suvasana laaga ooru sandadi lo paata padithe prathi gudi vaipu navvulu velthayi.",
+    "lyricsTelugu": "మల్లిపూల సువాసనలా ఊరి సందడిలో పాట పాడితే ప్రతి గడివైపు నవ్వులు వెల్తాయి.",
+    "duration": "0:06",
+    "imageURL": "https://picsum.photos/id/118/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-6s.mp3"
+  },
+  {
+    "title": "Telugu Jathi",
+    "titleTelugu": "తెలుగు జాతి",
+    "genre": "Devotional",
+    "genreTelugu": "భక్తి",
+    "lyrics": "Telugu maata palukaga bhasha oka geetham avuthundi. Manchi manasulatho mana jathi munduku nadustundi.",
+    "lyricsTelugu": "తెలుగు మాట పలుకగా భాష ఒక గీతం అవుతుంది. మంచి మనసులతో మన జాతి ముందుకు నడుస్తుంది.",
+    "duration": "0:03",
+    "imageURL": "https://picsum.photos/id/299/200/200",
+    "audioURL": "https://samplelib.com/lib/preview/mp3/sample-3s.mp3"
+  }
+]
