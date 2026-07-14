@@ -13,6 +13,7 @@ import FirebaseFirestore
 @available(iOS 16.0, *)
 struct SigninView: View {
 
+    @EnvironmentObject private var authSession: AuthSession
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
 
     @State private var email: String = ""
@@ -58,6 +59,11 @@ struct SigninView: View {
             }
             .onTapGesture {
                 dismissKeyboard()
+            }
+            .onAppear {
+                if errorMessage == nil {
+                    errorMessage = authSession.consumeAccessMessage()
+                }
             }
         }
     }
