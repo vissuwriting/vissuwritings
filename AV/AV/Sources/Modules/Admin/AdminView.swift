@@ -40,10 +40,10 @@ struct AdminView: View {
             AdminManagementItem(destination: .userManagement, icon: "person.2.badge.gearshape.fill", title: "User Management", subtitle: "Manage user accounts and roles", badge: "", iconBgHex: "#EAF3FB", iconHex: "#53A6E8", badgeBgHex: "#EAF3FB", badgeHex: "#5FADE9"),
             AdminManagementItem(destination: .contentModeration, icon: "checkmark.shield.fill", title: "Content Moderation", subtitle: "Review and moderate submitted content", badge: "", iconBgHex: "#FFF1E6", iconHex: "#F09A52", badgeBgHex: "#FFF1E6", badgeHex: "#F09A52"),
             AdminManagementItem(destination: .analytics, icon: "chart.bar.xaxis", title: "Analytics Dashboard", subtitle: "View detailed usage statistics", badge: "", iconBgHex: "#F3ECFB", iconHex: "#B087D7", badgeBgHex: "#F3ECFB", badgeHex: "#B087D7"),
-            AdminManagementItem(destination: .kavithalu, icon: "book.closed.fill", title: "Kavithalu Content", subtitle: "Manage poetry collection", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
-            AdminManagementItem(destination: .songs, icon: "music.note", title: "Songs Content", subtitle: "Manage songs and audio content", badge: "", iconBgHex: "#FFECEC", iconHex: "#E07B7B", badgeBgHex: "#FFECEC", badgeHex: "#E07B7B"),
-            AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "Stories Content", subtitle: "Manage stories and narrative content", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
-        ]
+            AdminManagementItem(destination: .kavithalu, icon: "book.closed.fill", title: "Post Kavithalu ", subtitle: "Manage poetry collection", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
+            AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "Post Stories ", subtitle: "Manage stories and narrative content", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75"),
+            AdminManagementItem(destination: .songs, icon: "music.note", title: "Post Songs ", subtitle: "Manage songs and audio ", badge: "", iconBgHex: "#FFECEC", iconHex: "#E07B7B", badgeBgHex: "#FFECEC", badgeHex: "#E07B7B")
+                    ]
     }
 
     var body: some View {
