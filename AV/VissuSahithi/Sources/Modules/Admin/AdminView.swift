@@ -701,7 +701,12 @@ struct AdminPostContentView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
+                HStack(spacing: 10) {
+                if contentType == .kavithalu && editingDocumentID == nil {
+                    laterButton
+                }
                 postButton
+                }
             }
         }
         .alert(saveMessage, isPresented: $showSavedAlert) {
@@ -733,11 +738,35 @@ struct AdminPostContentView: View {
 
     private var postButton: some View {
         Button {
-            postContent()
+            postContent(publishNow: true)
         } label: {
             Text(editingDocumentID == nil ? (language == .telugu ? "పోస్ట్" : "Post") : (language == .telugu ? "అప్‌డేట్" : "Update"))
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(hex: isPostDisabled ? "#AFCDEC" : "#2F82D8"))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .frame(height: 34)
+                .background(Color(hex: isPostDisabled ? "#AFCDEC" : "#2F82D8"))
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .disabled(isPostDisabled)
+    }
+
+    private var laterButton: some View {
+        Button {
+            postContent(publishNow: false)
+        } label: {
+            Text(language == .telugu ? "తర్వాత" : "Later")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: isPostDisabled ? "#AFCDEC" : "#64748B"))
+                .padding(.horizontal, 12)
+                .frame(height: 34)
+                .background(Color.white)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color(hex: isPostDisabled ? "#D7E3EF" : "#CBD5E1"), lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
         .disabled(isPostDisabled)
@@ -749,10 +778,10 @@ struct AdminPostContentView: View {
         return max(48, CGFloat(max(explicitLines, wrappedLines)) * 24 + 24)
     }
 
-    private func postContent() {
+    private func postContent(publishNow: Bool) {
         isSaving = true
         if contentType == .songs {
-            saveContent(imageData: nil)
+            saveContent(imageData: nil, publishNow: publishNow)
             return
         }
         if let selectedImageData {
@@ -760,13 +789,13 @@ struct AdminPostContentView: View {
                 finishSaving(message: language == .telugu ? "చిత్రాన్ని సిద్ధం చేయలేకపోయాము." : "Could not prepare the selected image.")
                 return
             }
-            saveContent(imageData: compressedImage)
+            saveContent(imageData: compressedImage, publishNow: publishNow)
         } else {
-            saveContent(imageData: nil)
+            saveContent(imageData: nil, publishNow: publishNow)
         }
     }
 
-    private func saveContent(imageData: Data?) {
+    private func saveContent(imageData: Data?, publishNow: Bool) {
         var data: [String: Any] = [
             "category": category.trimmingCharacters(in: .whitespacesAndNewlines),
             "languageCode": contentLanguage == .telugu ? "te" : "en"
@@ -780,7 +809,10 @@ struct AdminPostContentView: View {
         case .kavithalu:
             collection = "kavithalu"
             data[contentLanguage == .telugu ? "fullKavithaTelugu" : "fullKavitha"] = content
-            if editingDocumentID == nil { data["likes"] = 0 }
+            if editingDocumentID == nil {
+                data["likes"] = 0
+                data["isPublished"] = publishNow
+            }
         case .songs:
             collection = "songs"
             data[contentLanguage == .telugu ? "genreTelugu" : "genre"] = category

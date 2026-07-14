@@ -59,6 +59,18 @@ struct KavithaluView: View {
                             ForEach(filteredKavithalu) { item in
                                 ZStack(alignment: .topTrailing) {
                                     kavithaCard(item)
+                                        .overlay(alignment: .topLeading) {
+                                            if authSession.isAdmin && !item.isPublished {
+                                                Text("Draft")
+                                                    .font(.system(size: 11, weight: .bold))
+                                                    .foregroundColor(.white)
+                                                    .padding(.horizontal, 9)
+                                                    .padding(.vertical, 5)
+                                                    .background(Color.orange)
+                                                    .clipShape(Capsule())
+                                                    .padding(8)
+                                            }
+                                        }
                                         .contentShape(RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius))
                                         .onTapGesture {
                                             guard !isEditModeEnabled else { return }
@@ -69,6 +81,11 @@ struct KavithaluView: View {
                                     if isEditModeEnabled && authSession.isAdmin {
                                         HStack(spacing: 8) {
                                             if item.documentID != nil {
+                                                if !item.isPublished {
+                                                    publishIconButton {
+                                                        publishKavitha(item)
+                                                    }
+                                                }
                                                 editIconButton {
                                                     editingKavitha = item
                                                 }
@@ -150,8 +167,9 @@ struct KavithaluView: View {
         kavithalu = local
         kavithaluListener = Firestore.firestore().collection("kavithalu").addSnapshotListener { snapshot, _ in
             let remote = snapshot?.documents.compactMap { KavithaItem(data: $0.data(), documentID: $0.documentID) } ?? []
+            let visibleRemote = authSession.isAdmin ? remote : remote.filter(\.isPublished)
             let localTitles = Set(local.map { $0.title.lowercased() })
-            kavithalu = local + remote.filter { !localTitles.contains($0.title.lowercased()) }
+            kavithalu = local + visibleRemote.filter { !localTitles.contains($0.title.lowercased()) }
         }
     }
 
@@ -346,6 +364,14 @@ struct KavithaluView: View {
         likedCounts[item.id] = nil
     }
 
+    private func publishKavitha(_ item: KavithaItem) {
+        guard let documentID = item.documentID else { return }
+        Firestore.firestore().collection("kavithalu").document(documentID).updateData([
+            "isPublished": true,
+            "publishedAt": FieldValue.serverTimestamp()
+        ])
+    }
+
     private func deleteIconButton(action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: "trash.fill")
@@ -369,6 +395,18 @@ struct KavithaluView: View {
         }
         .buttonStyle(.plain)
     }
+
+    private func publishIconButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "paperplane.fill")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 22, height: 22)
+                .background(Color.green)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 private struct KavithaItem: Identifiable, Decodable, Hashable {
@@ -382,6 +420,7 @@ private struct KavithaItem: Identifiable, Decodable, Hashable {
     let imageURL: String?
     let imageData: Data?
     let documentID: String?
+    let published: Bool?
 
     init?(data: [String: Any], documentID: String) {
         let englishTitle = data["title"] as? String
@@ -400,7 +439,10 @@ private struct KavithaItem: Identifiable, Decodable, Hashable {
         self.imageURL = data["imageURL"] as? String
         self.imageData = data["imageData"] as? Data
         self.documentID = documentID
+        self.published = data["isPublished"] as? Bool
     }
+
+    var isPublished: Bool { published ?? true }
 
     var categoryKey: String {
         let lower = category.lowercased()
