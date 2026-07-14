@@ -16,6 +16,8 @@ struct SignupView: View {
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var isPasswordVisible = false
+    @State private var isConfirmPasswordVisible = false
     @State private var confirmPassword: String = ""
     @State private var errorMessage: String?
     @State private var isLoading = false
@@ -146,7 +148,8 @@ extension SignupView {
                 secureCapsuleField(
                     icon: AppConstants.Signup.passwordIcon,
                     placeholder: AppConstants.Signup.passwordPlaceholder(for: language),
-                    text: $password
+                    text: $password,
+                    isVisible: $isPasswordVisible
                 )
                 .focused($focusedField, equals: .password)
                 
@@ -155,7 +158,8 @@ extension SignupView {
                 secureCapsuleField(
                     icon: AppConstants.Signup.confirmPasswordIcon,
                     placeholder: AppConstants.Signup.confirmPasswordPlaceholder(for: language),
-                    text: $confirmPassword
+                    text: $confirmPassword,
+                    isVisible: $isConfirmPasswordVisible
                 )
                 .focused($focusedField, equals: .confirmPassword)
 
@@ -260,14 +264,33 @@ extension SignupView {
     }
     
     
-    func secureCapsuleField(icon: String, placeholder: String, text: Binding<String>) -> some View {
+    func secureCapsuleField(icon: String, placeholder: String, text: Binding<String>, isVisible: Binding<Bool>) -> some View {
         
         HStack {
             
             Image(systemName: icon)
                 .foregroundColor(AppConstants.Signup.textFieldIconColor)
             
-            SecureField(placeholder, text: text)
+            Group {
+                if isVisible.wrappedValue {
+                    TextField(placeholder, text: text)
+                } else {
+                    SecureField(placeholder, text: text)
+                }
+            }
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+
+            if !text.wrappedValue.isEmpty {
+                Button {
+                    isVisible.wrappedValue.toggle()
+                } label: {
+                    Image(systemName: isVisible.wrappedValue ? "eye.slash.fill" : "eye.fill")
+                        .foregroundColor(AppConstants.Signup.textFieldIconColor)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isVisible.wrappedValue ? "Hide password" : "Show password")
+            }
         }
         .padding()
         .background(

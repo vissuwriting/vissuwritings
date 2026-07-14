@@ -18,6 +18,7 @@ struct SigninView: View {
 
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var isPasswordVisible = false
     @State private var errorMessage: String?
     @State private var isLoading = false
     
@@ -165,12 +166,31 @@ extension SigninView {
                     Image(systemName: AppConstants.Signin.passwordIcon)
                         .foregroundColor(AppConstants.Signin.textFieldIconColor)
                     
-                    SecureField(AppConstants.Signin.passwordPlaceholder(for: language), text: $password)
-                        .focused($focusedField, equals: .password)
-                        .submitLabel(.done)
-                        .onSubmit {
-                            dismissKeyboard()
+                    Group {
+                        if isPasswordVisible {
+                            TextField(AppConstants.Signin.passwordPlaceholder(for: language), text: $password)
+                        } else {
+                            SecureField(AppConstants.Signin.passwordPlaceholder(for: language), text: $password)
                         }
+                    }
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .focused($focusedField, equals: .password)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        dismissKeyboard()
+                    }
+
+                    if !password.isEmpty {
+                        Button {
+                            isPasswordVisible.toggle()
+                        } label: {
+                            Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
+                                .foregroundColor(AppConstants.Signin.textFieldIconColor)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
+                    }
                 }
                 .padding()
                 .background(

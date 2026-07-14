@@ -38,7 +38,6 @@ final class AuthSession: ObservableObject {
                 guard let self else { return }
                 guard let refreshedUser = Auth.auth().currentUser,
                       refreshedUser.isEmailVerified else {
-                    try? Auth.auth().signOut()
                     self.user = nil
                     self.role = nil
                     self.isCheckingSession = false
