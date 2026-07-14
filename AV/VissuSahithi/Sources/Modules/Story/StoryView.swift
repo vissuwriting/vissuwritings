@@ -90,12 +90,18 @@ struct StoryView: View {
         .onAppear {
             loadStories()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .adminContentPosted)) { notification in
+            guard notification.object as? String == "stories" else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                loadStories()
+            }
+        }
     }
 
     private func loadStories() {
         let local = StoryItem.loadFromBundle(named: AppConstants.Story.jsonFileName)
         stories = local
-        Firestore.firestore().collection("stories").getDocuments { snapshot, _ in
+        Firestore.firestore().collection("stories").getDocuments(source: .server) { snapshot, _ in
             let remote = snapshot?.documents.compactMap { StoryItem(data: $0.data(), documentID: $0.documentID) } ?? []
             let localTitles = Set(local.map { $0.title.lowercased() })
             stories = local + remote.filter { !localTitles.contains($0.title.lowercased()) }

@@ -90,6 +90,12 @@ struct SongsView: View {
         .onAppear {
             loadSongs()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .adminContentPosted)) { notification in
+            guard notification.object as? String == "songs" else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                loadSongs()
+            }
+        }
         .onChange(of: selectedSegment) { segment in
             if segment == .read {
                 player.stop()
@@ -100,7 +106,7 @@ struct SongsView: View {
     private func loadSongs() {
         let local = SongItem.loadFromBundle(named: AppConstants.Songs.jsonFileName)
         songs = local
-        Firestore.firestore().collection("songs").getDocuments { snapshot, _ in
+        Firestore.firestore().collection("songs").getDocuments(source: .server) { snapshot, _ in
             let remote = snapshot?.documents.compactMap { SongItem(data: $0.data(), documentID: $0.documentID) } ?? []
             let localTitles = Set(local.map { $0.title.lowercased() })
             songs = local + remote.filter { !localTitles.contains($0.title.lowercased()) }

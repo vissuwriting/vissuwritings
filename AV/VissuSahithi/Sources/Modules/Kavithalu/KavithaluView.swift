@@ -10,6 +10,7 @@ import FirebaseFirestore
 
 @available(iOS 16.0, *)
 struct KavithaluView: View {
+    @EnvironmentObject private var authSession: AuthSession
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguageRaw = AppLanguage.english.rawValue
     @AppStorage(AppConstants.editModeStorageKey) private var isEditModeEnabled = false
 
@@ -20,6 +21,8 @@ struct KavithaluView: View {
     @State private var isDetailActive = false
     @State private var likedKavithaIDs: Set<UUID> = []
     @State private var likedCounts: [UUID: Int] = [:]
+    @State private var kavithaluListener: ListenerRegistration?
+    @State private var editingKavitha: KavithaItem?
 
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguageRaw)
@@ -63,10 +66,19 @@ struct KavithaluView: View {
                                             isDetailActive = true
                                         }
 
-                                    if isEditModeEnabled {
-                                        deleteIconButton {
-                                            deleteKavitha(item)
+                                    if isEditModeEnabled && authSession.isAdmin {
+                                        HStack(spacing: 8) {
+                                            if item.documentID != nil {
+                                                editIconButton {
+                                                    editingKavitha = item
+                                                }
+                                            }
+
+                                            deleteIconButton {
+                                                deleteKavitha(item)
+                                            }
                                         }
+                                        .padding(8)
                                     }
                                 }
                             }
@@ -97,12 +109,46 @@ struct KavithaluView: View {
         .onChange(of: selectedLanguageRaw) { _ in
             positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
         }
+        .onDisappear {
+            kavithaluListener?.remove()
+            kavithaluListener = nil
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .adminContentPosted)) { notification in
+            guard notification.object as? String == "kavithalu" else { return }
+            loadKavithalu()
+        }
+        .sheet(item: $editingKavitha) { item in
+            NavigationStack {
+                AdminPostContentView(
+                    contentType: .kavithalu,
+                    language: language,
+                    editingDocumentID: item.documentID,
+                    initialTitle: editUsesTelugu(item) ? (item.titleTelugu ?? item.title) : item.title,
+                    initialCategory: item.categoryKey,
+                    initialContent: editUsesTelugu(item) ? (item.fullKavithaTelugu ?? item.fullKavitha) : item.fullKavitha,
+                    initialImageData: item.imageData,
+                    isTelugu: editUsesTelugu(item)
+                )
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(language == .telugu ? "మూసివేయి" : "Close") {
+                            editingKavitha = nil
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func editUsesTelugu(_ item: KavithaItem) -> Bool {
+        language == .telugu && item.titleTelugu != nil && item.fullKavithaTelugu != nil
     }
 
     private func loadKavithalu() {
+        guard kavithaluListener == nil else { return }
         let local = KavithaItem.loadFromBundle(named: AppConstants.Kavithalu.jsonFileName)
         kavithalu = local
-        Firestore.firestore().collection("kavithalu").getDocuments { snapshot, _ in
+        kavithaluListener = Firestore.firestore().collection("kavithalu").addSnapshotListener { snapshot, _ in
             let remote = snapshot?.documents.compactMap { KavithaItem(data: $0.data(), documentID: $0.documentID) } ?? []
             let localTitles = Set(local.map { $0.title.lowercased() })
             kavithalu = local + remote.filter { !localTitles.contains($0.title.lowercased()) }
@@ -223,25 +269,30 @@ struct KavithaluView: View {
                     .padding(.top, AppConstants.Kavithalu.cardPreviewTopPadding)
 
                 HStack {
-                    Button {
-                        toggleLike(for: item)
-                    } label: {
-                        Label("\(displayLikes(for: item))", systemImage: likeSymbol(for: item))
-                            .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
-                            .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
+                    if item.documentID != nil {
+                        Button {
+                            toggleLike(for: item)
+                        } label: {
+                            Label("\(displayLikes(for: item))", systemImage: likeSymbol(for: item))
+                                .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
+                                .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
 
                     Spacer()
 
-                    Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
-                        .font(.system(size: AppConstants.Kavithalu.cardCategoryFontSize, weight: .semibold))
-                        .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
-                        .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
-                        .padding(.vertical, AppConstants.Kavithalu.categoryVerticalPadding)
-                        .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
-                        .clipShape(Capsule())
+                    if selectedCategoryKey == AppConstants.Kavithalu.Category.all {
+                        Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
+                            .font(.system(size: AppConstants.Kavithalu.cardCategoryFontSize, weight: .semibold))
+                            .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
+                            .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
+                            .padding(.vertical, AppConstants.Kavithalu.categoryVerticalPadding)
+                            .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
+                            .clipShape(Capsule())
+                    }
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.top, AppConstants.Kavithalu.cardMetaTopPadding)
             }
             .padding(AppConstants.Kavithalu.cardContentPadding)
@@ -305,7 +356,18 @@ struct KavithaluView: View {
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
-        .padding(8)
+    }
+
+    private func editIconButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "pencil")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 22, height: 22)
+                .background(Color(hex: "#2F82D8"))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -486,9 +548,11 @@ private struct KavithaDetailView: View {
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.detailAuthorColorHex))
 
                 HStack(spacing: AppConstants.Kavithalu.detailMetaSpacing) {
-                    Label("\(item.likes)", systemImage: AppConstants.Kavithalu.detailLikesSymbol)
-                        .font(.system(size: AppConstants.Kavithalu.detailLikesFontSize, weight: .semibold))
-                        .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
+                    if item.documentID != nil {
+                        Label("\(item.likes)", systemImage: AppConstants.Kavithalu.detailLikesSymbol)
+                            .font(.system(size: AppConstants.Kavithalu.detailLikesFontSize, weight: .semibold))
+                            .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
+                    }
 
                     Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
                         .font(.system(size: AppConstants.Kavithalu.detailMetaFontSize, weight: .semibold))

@@ -13,6 +13,10 @@ import Combine
 import FirebaseAuth
 import FirebaseFirestore
 
+extension Notification.Name {
+    static let adminContentPosted = Notification.Name("adminContentPosted")
+}
+
 @available(iOS 16.0, *)
 struct AdminView: View {
     private enum AdminSection: String, CaseIterable {
@@ -514,7 +518,7 @@ private struct AdminPlaceholderView: View {
     }
 }
 
-private enum AdminContentType {
+enum AdminContentType {
     case kavithalu
     case songs
     case stories
@@ -553,7 +557,7 @@ private enum AdminContentType {
 }
 
 @available(iOS 16.0, *)
-private struct AdminPostContentView: View {
+struct AdminPostContentView: View {
     private enum ContentLanguage: String, CaseIterable {
         case english = "English"
         case telugu = "Telugu"
@@ -561,6 +565,8 @@ private struct AdminPostContentView: View {
 
     let contentType: AdminContentType
     let language: AppLanguage
+    let editingDocumentID: String?
+    @Environment(\.dismiss) private var dismiss
 
     @State private var contentLanguage = ContentLanguage.english
     @State private var title = ""
@@ -579,6 +585,26 @@ private struct AdminPostContentView: View {
     @State private var showSavedAlert = false
     @State private var saveMessage = ""
     @State private var isSaving = false
+
+    init(
+        contentType: AdminContentType,
+        language: AppLanguage,
+        editingDocumentID: String? = nil,
+        initialTitle: String = "",
+        initialCategory: String = "",
+        initialContent: String = "",
+        initialImageData: Data? = nil,
+        isTelugu: Bool = false
+    ) {
+        self.contentType = contentType
+        self.language = language
+        self.editingDocumentID = editingDocumentID
+        _contentLanguage = State(initialValue: isTelugu ? .telugu : .english)
+        _title = State(initialValue: initialTitle)
+        _category = State(initialValue: initialCategory)
+        _content = State(initialValue: initialContent)
+        _selectedImageData = State(initialValue: initialImageData)
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -671,7 +697,7 @@ private struct AdminPostContentView: View {
             .padding(16)
         }
         .background(AppColors.background.ignoresSafeArea())
-        .navigationTitle(contentType.title(language))
+        .navigationTitle(editingDocumentID == nil ? contentType.title(language) : (language == .telugu ? "పోస్ట్ సవరించండి" : "Edit Post"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -709,7 +735,7 @@ private struct AdminPostContentView: View {
         Button {
             postContent()
         } label: {
-            Text(language == .telugu ? "పోస్ట్" : "Post")
+            Text(editingDocumentID == nil ? (language == .telugu ? "పోస్ట్" : "Post") : (language == .telugu ? "అప్‌డేట్" : "Update"))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(Color(hex: isPostDisabled ? "#AFCDEC" : "#2F82D8"))
         }
@@ -743,9 +769,9 @@ private struct AdminPostContentView: View {
     private func saveContent(imageData: Data?) {
         var data: [String: Any] = [
             "category": category.trimmingCharacters(in: .whitespacesAndNewlines),
-            "languageCode": contentLanguage == .telugu ? "te" : "en",
-            "createdAt": FieldValue.serverTimestamp()
+            "languageCode": contentLanguage == .telugu ? "te" : "en"
         ]
+        data[editingDocumentID == nil ? "createdAt" : "updatedAt"] = FieldValue.serverTimestamp()
         if let imageData { data["imageData"] = imageData }
         data[contentLanguage == .telugu ? "titleTelugu" : "title"] = title.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -754,7 +780,7 @@ private struct AdminPostContentView: View {
         case .kavithalu:
             collection = "kavithalu"
             data[contentLanguage == .telugu ? "fullKavithaTelugu" : "fullKavitha"] = content
-            data["likes"] = 0
+            if editingDocumentID == nil { data["likes"] = 0 }
         case .songs:
             collection = "songs"
             data[contentLanguage == .telugu ? "genreTelugu" : "genre"] = category
@@ -770,9 +796,22 @@ private struct AdminPostContentView: View {
             data["readMinutes"] = max(1, Int(ceil(Double(wordCount) / 200.0)))
         }
 
-        Firestore.firestore().collection(collection).addDocument(data: data) { error in
+        let completion: (Error?) -> Void = { error in
             finishSaving(error: error)
-            if error == nil { clearForm() }
+            if error == nil {
+                NotificationCenter.default.post(name: .adminContentPosted, object: collection)
+                if editingDocumentID == nil {
+                    clearForm()
+                } else {
+                    dismiss()
+                }
+            }
+        }
+
+        if let editingDocumentID {
+            Firestore.firestore().collection(collection).document(editingDocumentID).setData(data, merge: true, completion: completion)
+        } else {
+            Firestore.firestore().collection(collection).addDocument(data: data, completion: completion)
         }
     }
 
