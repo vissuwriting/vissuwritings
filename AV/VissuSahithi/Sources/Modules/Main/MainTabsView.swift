@@ -9,6 +9,7 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct MainTabsView: View {
+    @EnvironmentObject private var authSession: AuthSession
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     
     private var language: AppLanguage {
@@ -40,11 +41,13 @@ struct MainTabsView: View {
                 }
             
             
-            AdminView()
-                .tabItem {
-                    Image(systemName: AppConstants.Dashboard.adminTabIcon)
-                    Text(AppConstants.Dashboard.adminTabTitle(language))
-                }
+            if authSession.isAdmin {
+                AdminView()
+                    .tabItem {
+                        Image(systemName: AppConstants.Dashboard.adminTabIcon)
+                        Text(AppConstants.Dashboard.adminTabTitle(language))
+                    }
+            }
         }
     }
 }

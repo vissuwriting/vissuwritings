@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
 
 @available(iOS 16.0, *)
 struct SignupView: View {
@@ -15,6 +17,8 @@ struct SignupView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
+    @State private var errorMessage: String?
+    @State private var isLoading = false
     
     @FocusState private var focusedField: Field?
     @Environment(\.dismiss) var dismiss
@@ -154,12 +158,11 @@ extension SignupView {
                     text: $confirmPassword
                 )
                 .focused($focusedField, equals: .confirmPassword)
-                
-                
+
                 /// Signup Button
                 Button {
                     dismissKeyboard()
-                    print(AppConstants.Signup.signupTappedLog)
+                    createAccount()
                 } label: {
                     
                     Text(AppConstants.Signup.createAccountTitle(for: language))
@@ -173,8 +176,20 @@ extension SignupView {
                         )
                         .cornerRadius(AppConstants.Signup.buttonCornerRadius)
                 }
-                .disabled(!formValid)
+                .disabled(!formValid || isLoading)
                 .padding(.top, AppConstants.Signup.buttonTopPadding)
+
+                if isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                }
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
                 
                 
                 /// Bottom Login Text
@@ -276,6 +291,60 @@ extension SignupView {
     
     func dismissKeyboard() {
         focusedField = nil
+    }
+
+    func createAccount() {
+        errorMessage = nil
+        isLoading = true
+
+        Auth.auth().createUser(
+            withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines),
+            password: password
+        ) { result, error in
+            guard error == nil, let user = result?.user else {
+                isLoading = false
+                errorMessage = error?.localizedDescription ?? "Unable to create account."
+                return
+            }
+
+            let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let userProfile: [String: Any] = [
+                "uid": user.uid,
+                "name": trimmedName,
+                "email": user.email ?? email,
+                "role": "member",
+                "createdAt": FieldValue.serverTimestamp()
+            ]
+
+            Firestore.firestore().collection("users").document(user.uid).setData(userProfile) { firestoreError in
+                guard firestoreError == nil else {
+                    isLoading = false
+                    errorMessage = firestoreError?.localizedDescription
+                    return
+                }
+
+                let changeRequest = user.createProfileChangeRequest()
+                changeRequest.displayName = trimmedName
+                changeRequest.commitChanges { _ in
+                    user.sendEmailVerification { verificationError in
+                        guard verificationError == nil else {
+                            isLoading = false
+                            errorMessage = verificationError?.localizedDescription
+                            return
+                        }
+
+                        do {
+                            try Auth.auth().signOut()
+                            isLoading = false
+                            dismiss()
+                        } catch {
+                            isLoading = false
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

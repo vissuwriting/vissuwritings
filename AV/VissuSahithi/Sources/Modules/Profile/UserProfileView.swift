@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 @available(iOS 16.0, *)
 struct UserProfileView: View {
-    @AppStorage("isLoggedIn") private var isLoggedIn = true
+    @EnvironmentObject private var authSession: AuthSession
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     
     private var language: AppLanguage {
@@ -17,11 +18,11 @@ struct UserProfileView: View {
     }
     
     private var name: String {
-        language == .telugu ? "సత్య" : "Satya"
+        authSession.user?.displayName ?? (language == .telugu ? "వినియోగదారు" : "User")
     }
     
     private var email: String {
-        language == .telugu ? "సత్య.రచనలు@మెయిల్.కామ్" : "satya.writings@gmail.com"
+        authSession.user?.email ?? ""
     }
 
     private var languageTitle: String {
@@ -84,7 +85,7 @@ struct UserProfileView: View {
                     )
 
                     Button(logoutTitle) {
-                        isLoggedIn = false
+                        try? authSession.signOut()
                     }
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)

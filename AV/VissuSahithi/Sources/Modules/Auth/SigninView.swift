@@ -6,16 +6,19 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
 
 
 @available(iOS 16.0, *)
 struct SigninView: View {
-    
-    @Binding var isLoggedIn: Bool
+
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
 
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var errorMessage: String?
+    @State private var isLoading = false
     
     @FocusState private var focusedField: Field?
     
@@ -193,9 +196,7 @@ extension SigninView {
                 
                 Button {
                     dismissKeyboard()
-                    
-                    isLoggedIn = true
-                    
+                    signIn()
                 } label: {
                     
                     Text(AppConstants.Signin.loginTitle(for: language))
@@ -209,8 +210,20 @@ extension SigninView {
                         )
                         .cornerRadius(AppConstants.Signin.buttonCornerRadius)
                 }
-                .disabled(email.isEmpty || password.isEmpty)
+                .disabled(email.isEmpty || password.isEmpty || isLoading)
                 .padding(.top, AppConstants.Signin.buttonTopPadding)
+
+                if isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                }
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
                 
                 
                 /// Bottom Text
@@ -248,6 +261,53 @@ extension SigninView {
     func dismissKeyboard() {
         focusedField = nil
     }
+
+    func signIn() {
+        errorMessage = nil
+        isLoading = true
+
+        Auth.auth().signIn(
+            withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines),
+            password: password
+        ) { result, error in
+            if let error {
+                isLoading = false
+                errorMessage = error.localizedDescription
+                return
+            }
+
+            guard let user = result?.user else {
+                isLoading = false
+                errorMessage = "Unable to access this account."
+                return
+            }
+
+            user.reload { _ in
+                guard Auth.auth().currentUser?.isEmailVerified == true else {
+                    isLoading = false
+                    try? Auth.auth().signOut()
+                    errorMessage = "Please verify your email using the link Firebase sent before logging in."
+                    return
+                }
+
+                Firestore.firestore().collection("users").document(user.uid).getDocument { snapshot, firestoreError in
+                    isLoading = false
+
+                    if let firestoreError {
+                        try? Auth.auth().signOut()
+                        errorMessage = firestoreError.localizedDescription
+                        return
+                    }
+
+                    guard let snapshot, snapshot.exists else {
+                        try? Auth.auth().signOut()
+                        errorMessage = "No registered account profile was found for this user."
+                        return
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -275,7 +335,7 @@ struct WaveShape: Shape {
 
 #Preview {
     if #available(iOS 16.0, *) {
-        SigninView(isLoggedIn: .constant(false))
+        SigninView()
     } else {
         EmptyView()
     }
