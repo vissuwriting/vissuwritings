@@ -9,8 +9,14 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct AdminView: View {
+    private enum AdminSection: String, CaseIterable {
+        case post = "Post"
+        case overview = "Overview"
+    }
+
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
     @AppStorage(AppConstants.editModeStorageKey) private var isEditModeEnabled = false
+    @State private var selectedSection = AdminSection.post
 
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguage)
@@ -21,7 +27,12 @@ struct AdminView: View {
     }
 
     private var managementTitle: String {
-        language == .telugu ? "నిర్వహణ ఫంక్షన్లు" : "Management Functions"
+        switch selectedSection {
+        case .post:
+            return language == .telugu ? "పోస్ట్ చేయండి" : "Post Content"
+        case .overview:
+            return language == .telugu ? "అవలోకనం" : "Overview"
+        }
     }
 
     private var managementItems: [AdminManagementItem] {
@@ -46,6 +57,17 @@ struct AdminView: View {
                     ]
     }
 
+    private var visibleManagementItems: [AdminManagementItem] {
+        managementItems.filter { item in
+            switch selectedSection {
+            case .post:
+                return [.kavithalu, .songs, .stories].contains(item.destination)
+            case .overview:
+                return [.userManagement, .contentModeration, .analytics].contains(item.destination)
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -53,24 +75,33 @@ struct AdminView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 14) {
-                        HStack {
-                            Text(editModeTitle)
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(Color(hex: "#1D2430"))
-
-                            Spacer()
-
-                            Toggle("", isOn: $isEditModeEnabled)
-                                .labelsHidden()
+                        Picker("Admin Section", selection: $selectedSection) {
+                            ForEach(AdminSection.allCases, id: \.self) { section in
+                                Text(section.rawValue).tag(section)
+                            }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
-                        )
+                        .pickerStyle(.segmented)
+
+                        if selectedSection == .overview {
+                            HStack {
+                                Text(editModeTitle)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(Color(hex: "#1D2430"))
+
+                                Spacer()
+
+                                Toggle("", isOn: $isEditModeEnabled)
+                                    .labelsHidden()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
+                            )
+                        }
 
                         Text(managementTitle)
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
@@ -78,7 +109,7 @@ struct AdminView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.top, 4)
 
-                        ForEach(managementItems) { item in
+                        ForEach(visibleManagementItems) { item in
                             NavigationLink(value: item.destination) {
                                 managementCard(item)
                             }
