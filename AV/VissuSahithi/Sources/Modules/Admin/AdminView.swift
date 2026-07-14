@@ -18,6 +18,7 @@ struct AdminView: View {
     private enum AdminSection: String, CaseIterable {
         case post = "Post"
         case overview = "Overview"
+        case settings = "Settings"
     }
 
     @AppStorage(AppConstants.languageStorageKey) private var selectedLanguage = AppLanguage.english.rawValue
@@ -30,15 +31,6 @@ struct AdminView: View {
 
     private var editModeTitle: String {
         language == .telugu ? "ఎడిట్ మోడ్" : "Edit Mode"
-    }
-
-    private var managementTitle: String {
-        switch selectedSection {
-        case .post:
-            return language == .telugu ? "పోస్ట్ చేయండి" : "Post Content"
-        case .overview:
-            return language == .telugu ? "అవలోకనం" : "Overview"
-        }
     }
 
     private var managementItems: [AdminManagementItem] {
@@ -70,6 +62,8 @@ struct AdminView: View {
                 return [.kavithalu, .songs, .stories].contains(item.destination)
             case .overview:
                 return [.userManagement, .contentModeration, .analytics].contains(item.destination)
+            case .settings:
+                return false
             }
         }
     }
@@ -88,7 +82,14 @@ struct AdminView: View {
                         }
                         .pickerStyle(.segmented)
 
-                        if selectedSection == .overview {
+                        ForEach(visibleManagementItems) { item in
+                            NavigationLink(value: item.destination) {
+                                managementCard(item)
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if selectedSection == .settings {
                             HStack {
                                 Text(editModeTitle)
                                     .font(.system(size: 18, weight: .semibold))
@@ -107,19 +108,6 @@ struct AdminView: View {
                                 RoundedRectangle(cornerRadius: 14)
                                     .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
                             )
-                        }
-
-                        Text(managementTitle)
-                            .font(.system(size: 17, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color(hex: "#1D2430"))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top, 4)
-
-                        ForEach(visibleManagementItems) { item in
-                            NavigationLink(value: item.destination) {
-                                managementCard(item)
-                            }
-                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.top, 20)
@@ -299,12 +287,21 @@ private struct AdminUserManagementView: View {
                 .padding()
             } else {
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 12) {
-                        ForEach(users) { user in
-                            Button { selectedUser = user } label: {
-                                userCard(user)
+                    VStack(spacing: 14) {
+                        HStack(spacing: 7) {
+                            countBadge("Total", count: users.count, color: Color(hex: "#2F82D8"))
+                            countBadge("Active", count: users.filter { $0.displayStatus == "Active" }.count, color: Color(hex: "#3FA768"))
+                            countBadge("Blocked", count: users.filter { $0.displayStatus == "Blocked" }.count, color: Color(hex: "#D9534F"))
+                            countBadge("Not Verified", count: users.filter { !$0.emailVerified }.count, color: Color(hex: "#E59A36"))
+                        }
+
+                        LazyVStack(spacing: 12) {
+                            ForEach(users) { user in
+                                Button { selectedUser = user } label: {
+                                    userCard(user)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .padding(16)
@@ -325,6 +322,24 @@ private struct AdminUserManagementView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+    }
+
+    private func countBadge(_ title: String, count: Int, color: Color) -> some View {
+        VStack(spacing: 3) {
+            Text("\(count)")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(color)
+            Text(title)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(Color(hex: "#697588"))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 9)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.22), lineWidth: 1))
     }
 
     private func userCard(_ user: AdminUserRecord) -> some View {
@@ -401,19 +416,12 @@ private struct AdminUserManagementView: View {
                     Button {
                         updateUser(user, blocked: !(user.blocked || user.accountStatus == "blocked"))
                     } label: {
-                        Label(user.blocked || user.accountStatus == "blocked" ? "Unblock User" : "Block User", systemImage: user.blocked ? "lock.open.fill" : "hand.raised.fill")
+                        Label(user.blocked || user.accountStatus == "blocked" ? "Unblock" : "Block", systemImage: user.blocked ? "lock.open.fill" : "hand.raised.fill")
+                            .font(.system(size: 13, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(user.blocked ? .green : .orange)
-
-                    Button(role: .destructive) {
-                        removeUser(user)
-                    } label: {
-                        Label("Remove User Access", systemImage: "person.crop.circle.badge.minus")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
+                    .tint(user.blocked || user.accountStatus == "blocked" ? .green : .orange)
                 }
 
                 Spacer()
@@ -453,7 +461,12 @@ private struct AdminUserManagementView: View {
                     errorMessage = error.localizedDescription
                     return
                 }
-                users = snapshot?.documents.map(AdminUserRecord.init) ?? []
+                users = (snapshot?.documents.map(AdminUserRecord.init) ?? []).sorted { first, second in
+                    let firstIsAdmin = first.role.lowercased() == "admin"
+                    let secondIsAdmin = second.role.lowercased() == "admin"
+                    if firstIsAdmin != secondIsAdmin { return firstIsAdmin }
+                    return (first.createdAt ?? .distantPast) > (second.createdAt ?? .distantPast)
+                }
                 if let selectedID = selectedUser?.id {
                     selectedUser = users.first { $0.id == selectedID }
                 }
@@ -471,16 +484,6 @@ private struct AdminUserManagementView: View {
         }
     }
 
-    private func removeUser(_ user: AdminUserRecord) {
-        Firestore.firestore().collection("users").document(user.id).updateData([
-            "blocked": true,
-            "accountStatus": "removed",
-            "removedAt": FieldValue.serverTimestamp()
-        ]) { error in
-            if let error { errorMessage = error.localizedDescription }
-            selectedUser = nil
-        }
-    }
 }
 
 private struct AdminPlaceholderView: View {
