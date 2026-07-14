@@ -477,7 +477,7 @@ enum AppConstants {
 
     enum Signin {
         static let title = "Sign in"
-        static let emailPlaceholder = "Enter your Name"
+        static let emailPlaceholder = "Enter your Email"
         static let passwordPlaceholder = "Enter your password"
         static let loginTitle = "Login"
         static let forgotPasswordTitle = "Forgot Password?"

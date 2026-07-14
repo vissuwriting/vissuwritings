@@ -283,26 +283,55 @@ extension SigninView {
             }
 
             user.reload { _ in
-                guard Auth.auth().currentUser?.isEmailVerified == true else {
-                    isLoading = false
-                    try? Auth.auth().signOut()
-                    errorMessage = "Please verify your email using the link Firebase sent before logging in."
-                    return
-                }
-
                 Firestore.firestore().collection("users").document(user.uid).getDocument { snapshot, firestoreError in
-                    isLoading = false
-
                     if let firestoreError {
+                        isLoading = false
                         try? Auth.auth().signOut()
                         errorMessage = firestoreError.localizedDescription
                         return
                     }
 
                     guard let snapshot, snapshot.exists else {
+                        isLoading = false
                         try? Auth.auth().signOut()
                         errorMessage = "No registered account profile was found for this user."
                         return
+                    }
+
+                    let profile = snapshot.data() ?? [:]
+                    let status = (profile["accountStatus"] as? String ?? "active").lowercased()
+                    let isBlocked = profile["blocked"] as? Bool ?? false
+
+                    if isBlocked || status == "blocked" {
+                        isLoading = false
+                        try? Auth.auth().signOut()
+                        errorMessage = "This account has been blocked. Please contact the administrator."
+                        return
+                    }
+
+                    if status == "removed" || status == "inactive" {
+                        isLoading = false
+                        try? Auth.auth().signOut()
+                        errorMessage = status == "removed"
+                            ? "This account has been removed. Please contact the administrator."
+                            : "This account is inactive. Please contact the administrator."
+                        return
+                    }
+
+                    guard Auth.auth().currentUser?.isEmailVerified == true else {
+                        isLoading = false
+                        snapshot.reference.updateData(["emailVerified": false])
+                        try? Auth.auth().signOut()
+                        errorMessage = "Please verify your email using the link Firebase sent before logging in."
+                        return
+                    }
+
+                    snapshot.reference.updateData([
+                        "emailVerified": true,
+                        "accountStatus": "active",
+                        "lastLoginAt": FieldValue.serverTimestamp()
+                    ]) { _ in
+                        isLoading = false
                     }
                 }
             }

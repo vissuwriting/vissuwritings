@@ -313,6 +313,9 @@ extension SignupView {
                 "name": trimmedName,
                 "email": user.email ?? email,
                 "role": "member",
+                "emailVerified": false,
+                "accountStatus": "active",
+                "blocked": false,
                 "createdAt": FieldValue.serverTimestamp()
             ]
 

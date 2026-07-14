@@ -10,6 +10,7 @@ import PhotosUI
 import AVFoundation
 import UniformTypeIdentifiers
 import Combine
+import FirebaseAuth
 import FirebaseFirestore
 
 @available(iOS 16.0, *)
@@ -185,10 +186,7 @@ struct AdminView: View {
     private func destinationView(for destination: AdminDestination) -> some View {
         switch destination {
         case .userManagement:
-            AdminPlaceholderView(
-                title: language == .telugu ? "యూజర్ మేనేజ్‌మెంట్" : "User Management",
-                subtitle: language == .telugu ? "ఈ విభాగం త్వరలో అందుబాటులో ఉంటుంది." : "This section will be available soon."
-            )
+            AdminUserManagementView(language: language)
         case .contentModeration:
             AdminPlaceholderView(
                 title: language == .telugu ? "కంటెంట్ మోడరేషన్" : "Content Moderation",
@@ -229,6 +227,260 @@ private enum AdminDestination: Hashable {
     case kavithalu
     case songs
     case stories
+}
+
+private struct AdminUserRecord: Identifiable {
+    let id: String
+    let name: String
+    let email: String
+    let role: String
+    let emailVerified: Bool
+    let accountStatus: String
+    let blocked: Bool
+    let createdAt: Date?
+    let lastLoginAt: Date?
+
+    init(document: QueryDocumentSnapshot) {
+        let data = document.data()
+        id = document.documentID
+        name = data["name"] as? String ?? "User"
+        email = data["email"] as? String ?? "No email"
+        role = data["role"] as? String ?? "member"
+        emailVerified = data["emailVerified"] as? Bool ?? false
+        accountStatus = (data["accountStatus"] as? String ?? "active").lowercased()
+        blocked = data["blocked"] as? Bool ?? false
+        createdAt = (data["createdAt"] as? Timestamp)?.dateValue()
+        lastLoginAt = (data["lastLoginAt"] as? Timestamp)?.dateValue()
+    }
+
+    var initials: String {
+        let parts = name.split(separator: " ").prefix(2)
+        let value = parts.compactMap(\.first).map(String.init).joined()
+        return value.isEmpty ? "U" : value.uppercased()
+    }
+
+    var displayStatus: String {
+        if blocked || accountStatus == "blocked" { return "Blocked" }
+        if accountStatus == "removed" { return "Removed" }
+        if accountStatus == "inactive" { return "Inactive" }
+        if !emailVerified { return "Not verified" }
+        return "Active"
+    }
+
+    var statusColor: Color {
+        switch displayStatus {
+        case "Active": return Color(hex: "#3FA768")
+        case "Not verified": return Color(hex: "#E59A36")
+        default: return Color(hex: "#D9534F")
+        }
+    }
+}
+
+@available(iOS 16.0, *)
+private struct AdminUserManagementView: View {
+    let language: AppLanguage
+    @State private var users: [AdminUserRecord] = []
+    @State private var selectedUser: AdminUserRecord?
+    @State private var listener: ListenerRegistration?
+    @State private var errorMessage = ""
+
+    var body: some View {
+        Group {
+            if users.isEmpty && errorMessage.isEmpty {
+                ProgressView()
+            } else if !errorMessage.isEmpty {
+                VStack(spacing: 10) {
+                    Image(systemName: "person.crop.circle.badge.exclamationmark")
+                        .font(.largeTitle)
+                    Text("Unable to load users").font(.headline)
+                    Text(errorMessage).font(.footnote).foregroundColor(.secondary)
+                }
+                .multilineTextAlignment(.center)
+                .padding()
+            } else {
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 12) {
+                        ForEach(users) { user in
+                            Button { selectedUser = user } label: {
+                                userCard(user)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(16)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppColors.background.ignoresSafeArea())
+        .navigationTitle(language == .telugu ? "యూజర్లు" : "Registered Users")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear(perform: observeUsers)
+        .onDisappear {
+            listener?.remove()
+            listener = nil
+        }
+        .sheet(item: $selectedUser) { user in
+            userDetailsSheet(user)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    private func userCard(_ user: AdminUserRecord) -> some View {
+        HStack(spacing: 12) {
+            Text(user.initials)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 46, height: 46)
+                .background(Color(hex: "#5B9BD5"))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(user.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1D2430"))
+                Text(user.email)
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(hex: "#7A8698"))
+                    .lineLimit(1)
+                Text(user.displayStatus)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(user.statusColor)
+            }
+
+            Spacer(minLength: 8)
+
+            Text(user.role.capitalized)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(Color(hex: "#2F82D8"))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
+                .background(Color(hex: "#EAF3FB"))
+                .clipShape(Capsule())
+        }
+        .padding(14)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color(hex: "#E5EAF1"), lineWidth: 1))
+    }
+
+    private func userDetailsSheet(_ user: AdminUserRecord) -> some View {
+        NavigationStack {
+            VStack(spacing: 18) {
+                Text(user.initials)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 76, height: 76)
+                    .background(Color(hex: "#5B9BD5"))
+                    .clipShape(Circle())
+
+                VStack(spacing: 5) {
+                    Text(user.name).font(.title3.bold())
+                    Text(user.email).foregroundColor(.secondary)
+                    HStack {
+                        Text(user.role.capitalized)
+                        Text("•")
+                        Text(user.displayStatus).foregroundColor(user.statusColor)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                }
+
+                VStack(spacing: 0) {
+                    detailRow("Registered", value: formatted(user.createdAt))
+                    Divider()
+                    detailRow("Last login", value: formatted(user.lastLoginAt))
+                    Divider()
+                    detailRow("Email", value: user.emailVerified ? "Verified" : "Not verified")
+                }
+                .padding(.horizontal)
+                .background(Color(hex: "#F7F9FC"))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                if user.id != Auth.auth().currentUser?.uid {
+                    Button {
+                        updateUser(user, blocked: !(user.blocked || user.accountStatus == "blocked"))
+                    } label: {
+                        Label(user.blocked || user.accountStatus == "blocked" ? "Unblock User" : "Block User", systemImage: user.blocked ? "lock.open.fill" : "hand.raised.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(user.blocked ? .green : .orange)
+
+                    Button(role: .destructive) {
+                        removeUser(user)
+                    } label: {
+                        Label("Remove User Access", systemImage: "person.crop.circle.badge.minus")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                Spacer()
+            }
+            .padding(10)
+           
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { selectedUser = nil }
+                }
+            }
+        }
+    }
+
+    private func detailRow(_ title: String, value: String) -> some View {
+        HStack {
+            Text(title).foregroundColor(.secondary)
+            Spacer()
+            Text(value).fontWeight(.medium)
+        }
+        .font(.subheadline)
+        .padding(.vertical, 12)
+    }
+
+    private func formatted(_ date: Date?) -> String {
+        guard let date else { return "Never" }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    private func observeUsers() {
+        guard listener == nil else { return }
+        listener = Firestore.firestore().collection("users")
+            .order(by: "createdAt", descending: true)
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    errorMessage = error.localizedDescription
+                    return
+                }
+                users = snapshot?.documents.map(AdminUserRecord.init) ?? []
+                if let selectedID = selectedUser?.id {
+                    selectedUser = users.first { $0.id == selectedID }
+                }
+            }
+    }
+
+    private func updateUser(_ user: AdminUserRecord, blocked: Bool) {
+        Firestore.firestore().collection("users").document(user.id).updateData([
+            "blocked": blocked,
+            "accountStatus": blocked ? "blocked" : "active",
+            "updatedAt": FieldValue.serverTimestamp()
+        ]) { error in
+            if let error { errorMessage = error.localizedDescription }
+            selectedUser = nil
+        }
+    }
+
+    private func removeUser(_ user: AdminUserRecord) {
+        Firestore.firestore().collection("users").document(user.id).updateData([
+            "blocked": true,
+            "accountStatus": "removed",
+            "removedAt": FieldValue.serverTimestamp()
+        ]) { error in
+            if let error { errorMessage = error.localizedDescription }
+            selectedUser = nil
+        }
+    }
 }
 
 private struct AdminPlaceholderView: View {
