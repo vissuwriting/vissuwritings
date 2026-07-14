@@ -348,7 +348,7 @@ extension SigninView {
                         isLoading = false
                         snapshot.reference.updateData(["emailVerified": false])
                         try? Auth.auth().signOut()
-                        errorMessage = "Please verify your email using the link Firebase sent before logging in."
+                        errorMessage = "Please verify your email address before logging in."
                         return
                     }
 
