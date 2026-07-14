@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 @available(iOS 16.0, *)
 struct StoryView: View {
@@ -87,7 +88,17 @@ struct StoryView: View {
             )
         }
         .onAppear {
-            stories = StoryItem.loadFromBundle(named: AppConstants.Story.jsonFileName)
+            loadStories()
+        }
+    }
+
+    private func loadStories() {
+        let local = StoryItem.loadFromBundle(named: AppConstants.Story.jsonFileName)
+        stories = local
+        Firestore.firestore().collection("stories").getDocuments { snapshot, _ in
+            let remote = snapshot?.documents.compactMap { StoryItem(data: $0.data(), documentID: $0.documentID) } ?? []
+            let localTitles = Set(local.map { $0.title.lowercased() })
+            stories = local + remote.filter { !localTitles.contains($0.title.lowercased()) }
         }
     }
 
@@ -142,7 +153,7 @@ struct StoryView: View {
 
     private func storyCard(_ story: StoryItem) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            StoryCardImage(urlString: story.imageURL)
+            StoryCardImage(urlString: story.imageURL, imageData: story.imageData)
                 .frame(height: AppConstants.Story.cardImageHeight)
 
             VStack(alignment: .leading, spacing: 0) {
@@ -170,6 +181,13 @@ struct StoryView: View {
     }
 
     private func deleteStory(_ story: StoryItem) {
+        if let documentID = story.documentID {
+            Firestore.firestore().collection("stories").document(documentID).delete { error in
+                guard error == nil else { return }
+                stories.removeAll { $0.id == story.id }
+            }
+            return
+        }
         stories.removeAll { $0.id == story.id }
     }
 
@@ -189,10 +207,15 @@ struct StoryView: View {
 
 private struct StoryCardImage: View {
     let urlString: String
+    let imageData: Data?
 
     var body: some View {
         Group {
-            if let url = URL(string: urlString), !urlString.isEmpty {
+            if let imageData, let image = UIImage(data: imageData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else if let url = URL(string: urlString), !urlString.isEmpty {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
@@ -244,6 +267,31 @@ private struct StoryItem: Identifiable, Decodable, Hashable {
     let category: String
     let readMinutes: Int
     let imageURL: String
+    let imageData: Data?
+    let documentID: String?
+
+    init?(data: [String: Any], documentID: String) {
+        let englishTitle = data["title"] as? String
+        let teluguTitle = data["titleTelugu"] as? String
+        let englishStory = data["fullStory"] as? String
+        let teluguStory = data["fullStoryTelugu"] as? String
+        guard let availableTitle = englishTitle ?? teluguTitle,
+              let availableStory = englishStory ?? teluguStory,
+              let category = data["category"] as? String else { return nil }
+        self.title = englishTitle ?? availableTitle
+        self.titleTelugu = teluguTitle
+        self.author = (data["author"] as? String) ?? (data["authorTelugu"] as? String) ?? ""
+        self.authorTelugu = data["authorTelugu"] as? String
+        self.summary = (data["summary"] as? String) ?? (data["summaryTelugu"] as? String) ?? String(availableStory.prefix(140))
+        self.summaryTelugu = data["summaryTelugu"] as? String
+        self.fullStory = englishStory ?? availableStory
+        self.fullStoryTelugu = data["fullStoryTelugu"] as? String
+        self.category = category
+        self.readMinutes = (data["readMinutes"] as? NSNumber)?.intValue ?? 1
+        self.imageURL = data["imageURL"] as? String ?? ""
+        self.imageData = data["imageData"] as? Data
+        self.documentID = documentID
+    }
 
     func title(for language: AppLanguage) -> String {
         if language == .telugu, let titleTelugu, !titleTelugu.isEmpty { return titleTelugu }
@@ -287,7 +335,7 @@ private struct StoryDetailView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: AppConstants.Story.detailSpacing) {
-                StoryCardImage(urlString: story.imageURL)
+                StoryCardImage(urlString: story.imageURL, imageData: story.imageData)
                     .frame(height: 230)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
 

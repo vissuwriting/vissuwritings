@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import Combine
+import FirebaseFirestore
 
 @available(iOS 16.0, *)
 struct SongsView: View {
@@ -87,12 +88,22 @@ struct SongsView: View {
             }
         }
         .onAppear {
-            songs = SongItem.loadFromBundle(named: AppConstants.Songs.jsonFileName)
+            loadSongs()
         }
         .onChange(of: selectedSegment) { segment in
             if segment == .read {
                 player.stop()
             }
+        }
+    }
+
+    private func loadSongs() {
+        let local = SongItem.loadFromBundle(named: AppConstants.Songs.jsonFileName)
+        songs = local
+        Firestore.firestore().collection("songs").getDocuments { snapshot, _ in
+            let remote = snapshot?.documents.compactMap { SongItem(data: $0.data(), documentID: $0.documentID) } ?? []
+            let localTitles = Set(local.map { $0.title.lowercased() })
+            songs = local + remote.filter { !localTitles.contains($0.title.lowercased()) }
         }
     }
 
@@ -188,7 +199,7 @@ struct SongsView: View {
         let isCurrent = player.currentIndex == index
 
         return HStack(spacing: 12) {
-            SongRowArt(urlString: song.imageURL)
+            SongRowArt(urlString: song.imageURL, imageData: song.imageData)
                 .frame(width: AppConstants.Songs.listRowImageSize, height: AppConstants.Songs.listRowImageSize)
 
             VStack(alignment: .leading, spacing: 3) {
@@ -235,6 +246,17 @@ struct SongsView: View {
     }
 
     private func deleteSong(_ song: SongItem) {
+        if let documentID = song.documentID {
+            Firestore.firestore().collection("songs").document(documentID).delete { error in
+                guard error == nil else { return }
+                removeSongFromList(song)
+            }
+            return
+        }
+        removeSongFromList(song)
+    }
+
+    private func removeSongFromList(_ song: SongItem) {
         guard let deletedIndex = songs.firstIndex(where: { $0.id == song.id }) else { return }
         songs.removeAll { $0.id == song.id }
         player.handleSongDeleted(at: deletedIndex, remainingCount: songs.count)
@@ -335,10 +357,15 @@ struct SongsView: View {
 
 private struct SongRowArt: View {
     let urlString: String
+    let imageData: Data?
 
     var body: some View {
         Group {
-            if let url = URL(string: urlString), !urlString.isEmpty {
+            if let imageData, let image = UIImage(data: imageData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else if let url = URL(string: urlString), !urlString.isEmpty {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
@@ -438,7 +465,7 @@ private final class SongsPlayerController: ObservableObject {
     }
 
     private func play(at index: Int, songs: [SongItem]) {
-        guard songs.indices.contains(index), let url = URL(string: songs[index].audioURL) else { return }
+        guard songs.indices.contains(index), let url = playableURL(for: songs[index]) else { return }
 
         if let endObserver {
             NotificationCenter.default.removeObserver(endObserver)
@@ -473,6 +500,18 @@ private final class SongsPlayerController: ObservableObject {
         }
 
         newPlayer.play()
+    }
+
+    private func playableURL(for song: SongItem) -> URL? {
+        if let audioData = song.audioData {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("song-\(song.id.uuidString).m4a")
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? audioData.write(to: url, options: .atomic)
+            }
+            return url
+        }
+        return URL(string: song.audioURL)
     }
 
     private func playNext(songs: [SongItem]) {
@@ -514,7 +553,31 @@ private struct SongItem: Identifiable, Decodable, Hashable {
     let lyricsTelugu: String?
     let duration: String
     let imageURL: String
+    let imageData: Data?
     let audioURL: String
+    let audioData: Data?
+    let documentID: String?
+
+    init?(data: [String: Any], documentID: String) {
+        let englishTitle = data["title"] as? String
+        let teluguTitle = data["titleTelugu"] as? String
+        let englishGenre = data["genre"] as? String
+        let teluguGenre = data["genreTelugu"] as? String
+        guard let availableTitle = englishTitle ?? teluguTitle,
+              let availableGenre = englishGenre ?? teluguGenre else { return nil }
+        self.title = englishTitle ?? availableTitle
+        self.titleTelugu = teluguTitle
+        self.genre = englishGenre ?? availableGenre
+        self.genreTelugu = teluguGenre
+        self.lyrics = (data["lyrics"] as? String) ?? (data["lyricsTelugu"] as? String)
+        self.lyricsTelugu = data["lyricsTelugu"] as? String
+        self.duration = data["duration"] as? String ?? "0:00"
+        self.imageURL = data["imageURL"] as? String ?? ""
+        self.imageData = data["imageData"] as? Data
+        self.audioURL = data["audioURL"] as? String ?? ""
+        self.audioData = data["audioData"] as? Data
+        self.documentID = documentID
+    }
 
     func title(for language: AppLanguage) -> String {
         if language == .telugu, let titleTelugu, !titleTelugu.isEmpty { return titleTelugu }
@@ -558,7 +621,7 @@ private struct SongLyricsDetailView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 12) {
-                SongRowArt(urlString: song.imageURL)
+                SongRowArt(urlString: song.imageURL, imageData: song.imageData)
                     .frame(height: 210)
                     .frame(maxWidth: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: 18))

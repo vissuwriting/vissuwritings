@@ -6,6 +6,11 @@
 //
 
 import SwiftUI
+import PhotosUI
+import AVFoundation
+import UniformTypeIdentifiers
+import Combine
+import FirebaseFirestore
 
 @available(iOS 16.0, *)
 struct AdminView: View {
@@ -259,19 +264,19 @@ private enum AdminContentType {
     case songs
     case stories
 
+    var collectionName: String {
+        switch self {
+        case .kavithalu: return "kavithalu"
+        case .songs: return "songs"
+        case .stories: return "stories"
+        }
+    }
+
     func title(_ language: AppLanguage) -> String {
         switch self {
         case .kavithalu: return language == .telugu ? "కవిత పోస్ట్ చేయండి" : "Post Kavitha"
         case .songs: return language == .telugu ? "పాట పోస్ట్ చేయండి" : "Post Song"
         case .stories: return language == .telugu ? "కథ పోస్ట్ చేయండి" : "Post Story"
-        }
-    }
-
-    func subtitle(_ language: AppLanguage) -> String {
-        switch self {
-        case .kavithalu: return language == .telugu ? "అడ్మిన్ కోసం కవితా కంటెంట్ పోస్ట్ స్క్రీన్" : "Admin-only posting screen for kavithalu content"
-        case .songs: return language == .telugu ? "అడ్మిన్ కోసం పాటల కంటెంట్ పోస్ట్ స్క్రీన్" : "Admin-only posting screen for songs content"
-        case .stories: return language == .telugu ? "అడ్మిన్ కోసం కథల కంటెంట్ పోస్ట్ స్క్రీన్" : "Admin-only posting screen for stories content"
         }
     }
 
@@ -294,57 +299,75 @@ private enum AdminContentType {
 
 @available(iOS 16.0, *)
 private struct AdminPostContentView: View {
+    private enum ContentLanguage: String, CaseIterable {
+        case english = "English"
+        case telugu = "Telugu"
+    }
+
     let contentType: AdminContentType
     let language: AppLanguage
 
+    @State private var contentLanguage = ContentLanguage.english
     @State private var title = ""
     @State private var category = ""
     @State private var content = ""
+    @State private var author = ""
+    @State private var summary = ""
+    @State private var duration = ""
+    @State private var audioURL = ""
+    @State private var audioData: Data?
+    @State private var audioFileName = ""
+    @State private var showingAudioImporter = false
+    @StateObject private var audioRecorder = AdminAudioRecorder()
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var selectedImageData: Data?
     @State private var showSavedAlert = false
+    @State private var saveMessage = ""
+    @State private var isSaving = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 12) {
-                    Image(systemName: contentType.heroIcon())
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(Color(hex: "#2F82D8"))
-                        .frame(width: 42, height: 42)
-                        .background(Color(hex: "#EAF3FB"))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(contentType.title(language))
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(hex: "#1D2430"))
-
-                        Text(contentType.subtitle(language))
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(hex: "#8A96A8"))
+                Picker("Content Language", selection: $contentLanguage) {
+                    ForEach(ContentLanguage.allCases, id: \.self) { option in
+                        Text(option.rawValue).tag(option)
                     }
                 }
+                .pickerStyle(.segmented)
 
                 VStack(spacing: 12) {
                     adminField(
-                        title: language == .telugu ? "శీర్షిక" : "Title",
+                        title: contentLanguage == .telugu ? "శీర్షిక" : "Title",
                         text: $title,
-                        placeholder: language == .telugu ? "శీర్షిక నమోదు చేయండి" : "Enter title"
+                        placeholder: contentLanguage == .telugu ? "శీర్షిక నమోదు చేయండి" : "Enter title"
                     )
 
-                    adminField(
-                        title: language == .telugu ? "వర్గం" : "Category",
-                        text: $category,
-                        placeholder: language == .telugu ? "వర్గం నమోదు చేయండి" : "Enter category"
-                    )
+                    if contentType == .kavithalu || contentType == .stories || contentType == .songs {
+                        categoryPicker
+                    }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(language == .telugu ? "కంటెంట్" : "Content")
+                    if contentType == .songs {
+                        songAudioPicker
+                    }
+
+                    if contentType == .stories {
+                        adminField(title: contentLanguage == .telugu ? "రచయిత" : "Author", text: $author, placeholder: contentLanguage == .telugu ? "రచయిత పేరు" : "Enter author")
+                        adminField(title: contentLanguage == .telugu ? "సారాంశం" : "Summary", text: $summary, placeholder: contentLanguage == .telugu ? "సారాంశం నమోదు చేయండి" : "Enter summary")
+                    }
+
+                    if contentType != .songs {
+                        imagePicker
+                    }
+
+                    if contentType != .songs {
+                      VStack(alignment: .leading, spacing: 8) {
+                        Text(contentLanguage == .telugu ? "కంటెంట్" : "Content")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Color(hex: "#1D2430"))
 
                         ZStack(alignment: .topLeading) {
                             TextEditor(text: $content)
-                                .frame(minHeight: 180)
+                                .frame(height: contentEditorHeight)
                                 .padding(8)
                                 .scrollContentBackground(.hidden)
                                 .background(Color(hex: "#F7F9FC"))
@@ -355,14 +378,28 @@ private struct AdminPostContentView: View {
                                 )
 
                             if content.isEmpty {
-                                Text(contentType.bodyPlaceholder(language))
+                                Text(contentType.bodyPlaceholder(contentLanguage == .telugu ? .telugu : .english))
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(Color(hex: "#A1ACBC"))
                                     .padding(.top, 20)
                                     .padding(.leading, 14)
                             }
+
+                            if !content.isEmpty {
+                                Button {
+                                    content = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(Color(hex: "#8A96A8"))
+                                        .padding(12)
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                                .buttonStyle(.plain)
+                            }
                         }
+                      }
                     }
+
                 }
                 .padding(14)
                 .background(.white)
@@ -372,25 +409,337 @@ private struct AdminPostContentView: View {
                         .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
                 )
 
-                Button {
-                    showSavedAlert = true
-                } label: {
-                    Text(language == .telugu ? "పోస్ట్ చేయండి" : "Post Content")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                        .background(Color(hex: "#2F82D8"))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                if isSaving {
+                    ProgressView().frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.plain)
             }
             .padding(16)
         }
         .background(AppColors.background.ignoresSafeArea())
-        .alert(language == .telugu ? "పోస్ట్ సేవ్ అయింది" : "Post saved", isPresented: $showSavedAlert) {
+        .navigationTitle(contentType.title(language))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                postButton
+            }
+        }
+        .alert(saveMessage, isPresented: $showSavedAlert) {
             Button(language == .telugu ? "సరే" : "OK", role: .cancel) {}
         }
+        .onChange(of: selectedPhoto) { newPhoto in
+            guard let newPhoto else { return }
+            Task {
+                selectedImageData = try? await newPhoto.loadTransferable(type: Data.self)
+            }
+        }
+        .fileImporter(
+            isPresented: $showingAudioImporter,
+            allowedContentTypes: [.audio],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first else { return }
+            loadAudioFile(from: url)
+        }
+    }
+
+    private var isPostDisabled: Bool {
+        isSaving
+        || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        || (contentType != .songs && content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        || category.isEmpty
+        || (contentType == .songs && audioData == nil)
+    }
+
+    private var postButton: some View {
+        Button {
+            postContent()
+        } label: {
+            Text(language == .telugu ? "పోస్ట్" : "Post")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(Color(hex: isPostDisabled ? "#AFCDEC" : "#2F82D8"))
+        }
+        .buttonStyle(.plain)
+        .disabled(isPostDisabled)
+    }
+
+    private var contentEditorHeight: CGFloat {
+        let explicitLines = content.components(separatedBy: .newlines).count
+        let wrappedLines = max(1, Int(ceil(Double(content.count) / 34.0)))
+        return max(48, CGFloat(max(explicitLines, wrappedLines)) * 24 + 24)
+    }
+
+    private func postContent() {
+        isSaving = true
+        if contentType == .songs {
+            saveContent(imageData: nil)
+            return
+        }
+        if let selectedImageData {
+            guard let compressedImage = compressedImageData(from: selectedImageData) else {
+                finishSaving(message: language == .telugu ? "చిత్రాన్ని సిద్ధం చేయలేకపోయాము." : "Could not prepare the selected image.")
+                return
+            }
+            saveContent(imageData: compressedImage)
+        } else {
+            saveContent(imageData: nil)
+        }
+    }
+
+    private func saveContent(imageData: Data?) {
+        var data: [String: Any] = [
+            "category": category.trimmingCharacters(in: .whitespacesAndNewlines),
+            "languageCode": contentLanguage == .telugu ? "te" : "en",
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+        if let imageData { data["imageData"] = imageData }
+        data[contentLanguage == .telugu ? "titleTelugu" : "title"] = title.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let collection: String
+        switch contentType {
+        case .kavithalu:
+            collection = "kavithalu"
+            data[contentLanguage == .telugu ? "fullKavithaTelugu" : "fullKavitha"] = content
+            data["likes"] = 0
+        case .songs:
+            collection = "songs"
+            data[contentLanguage == .telugu ? "genreTelugu" : "genre"] = category
+            if let audioData { data["audioData"] = audioData }
+            data["audioFileName"] = audioFileName
+            data["duration"] = audioDurationText
+        case .stories:
+            collection = "stories"
+            data[contentLanguage == .telugu ? "authorTelugu" : "author"] = author
+            data[contentLanguage == .telugu ? "summaryTelugu" : "summary"] = summary
+            data[contentLanguage == .telugu ? "fullStoryTelugu" : "fullStory"] = content
+            let wordCount = content.split { $0.isWhitespace || $0.isNewline }.count
+            data["readMinutes"] = max(1, Int(ceil(Double(wordCount) / 200.0)))
+        }
+
+        Firestore.firestore().collection(collection).addDocument(data: data) { error in
+            finishSaving(error: error)
+            if error == nil { clearForm() }
+        }
+    }
+
+    private func finishSaving(error: Error?) {
+        isSaving = false
+        saveMessage = error?.localizedDescription ?? (language == .telugu ? "పోస్ట్ సేవ్ అయింది" : "Post saved")
+        showSavedAlert = true
+    }
+
+    private func finishSaving(message: String) {
+        isSaving = false
+        saveMessage = message
+        showSavedAlert = true
+    }
+
+    private func compressedImageData(from data: Data) -> Data? {
+        guard let image = UIImage(data: data) else { return nil }
+        let maximumDimension: CGFloat = 1200
+        let scale = min(1, maximumDimension / max(image.size.width, image.size.height))
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let resizedImage = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+
+        for quality in [0.72, 0.58, 0.44, 0.32] {
+            if let result = resizedImage.jpegData(compressionQuality: quality), result.count <= 600_000 {
+                return result
+            }
+        }
+        return resizedImage.jpegData(compressionQuality: 0.25)
+    }
+
+    private func clearForm() {
+        title = ""; category = ""; content = ""
+        author = ""; summary = ""
+        duration = ""; audioURL = ""; audioData = nil; audioFileName = ""
+        selectedPhoto = nil; selectedImageData = nil
+    }
+
+    private var availableCategories: [String] {
+        switch contentType {
+        case .kavithalu:
+            return Array(AppConstants.Kavithalu.categoryKeys.dropFirst())
+        case .stories:
+            return Array(AppConstants.Story.categories.dropFirst())
+        case .songs:
+            return AppConstants.Songs.categories
+        }
+    }
+
+    private func categoryTitle(_ value: String) -> String {
+        switch contentType {
+        case .kavithalu:
+            return AppConstants.Kavithalu.categoryLabel(for: value, language: contentLanguage == .telugu ? .telugu : .english)
+        case .stories:
+            return AppConstants.Story.categoryLabel(value, contentLanguage == .telugu ? .telugu : .english)
+        case .songs:
+            return value
+        }
+    }
+
+    private var categoryPicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(contentLanguage == .telugu ? "వర్గం" : "Category")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: "#1D2430"))
+
+            Menu {
+                ForEach(availableCategories, id: \.self) { option in
+                    Button(categoryTitle(option)) { category = option }
+                }
+            } label: {
+                HStack {
+                    Text(category.isEmpty ? (contentLanguage == .telugu ? "వర్గాన్ని ఎంచుకోండి" : "Select category") : categoryTitle(category))
+                        .foregroundColor(category.isEmpty ? Color(hex: "#A1ACBC") : Color(hex: "#1D2430"))
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .foregroundColor(Color(hex: "#8A96A8"))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 13)
+                .background(Color(hex: "#F7F9FC"))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "#E5EAF1"), lineWidth: 1))
+            }
+        }
+    }
+
+    private var imagePicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(contentLanguage == .telugu ? "చిత్రం" : "Image")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: "#1D2430"))
+
+            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                HStack(spacing: 10) {
+                    Image(systemName: selectedImageData == nil ? "photo.badge.plus" : "checkmark.circle.fill")
+                    Text(selectedImageData == nil
+                         ? (contentLanguage == .telugu ? "చిత్రాన్ని ఎంచుకోండి" : "Choose Image")
+                         : (contentLanguage == .telugu ? "చిత్రం ఎంపికైంది" : "Image Selected"))
+                    Spacer()
+                }
+                .foregroundColor(Color(hex: selectedImageData == nil ? "#2F82D8" : "#59A26B"))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 13)
+                .background(Color(hex: "#F7F9FC"))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "#E5EAF1"), lineWidth: 1))
+            }
+
+            if let selectedImageData,
+               let previewImage = UIImage(data: selectedImageData) {
+                Image(uiImage: previewImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
+                    )
+            }
+        }
+    }
+
+    private var songAudioPicker: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(contentLanguage == .telugu ? "ఆడియో" : "Audio")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: "#1D2430"))
+
+            HStack(spacing: 10) {
+                Button {
+                    showingAudioImporter = true
+                } label: {
+                    Label(contentLanguage == .telugu ? "ఫైల్" : "Choose File", systemImage: "folder")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Button {
+                    toggleRecording()
+                } label: {
+                    Label(
+                        audioRecorder.isRecording ? (contentLanguage == .telugu ? "ఆపు" : "Stop") : (contentLanguage == .telugu ? "రికార్డ్" : "Record"),
+                        systemImage: audioRecorder.isRecording ? "stop.circle.fill" : "mic.circle.fill"
+                    )
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(audioRecorder.isRecording ? .red : Color(hex: "#2F82D8"))
+            }
+
+            if !audioFileName.isEmpty {
+                HStack {
+                    Image(systemName: "waveform.circle.fill")
+                        .foregroundColor(Color(hex: "#59A26B"))
+                    Text(audioFileName)
+                        .lineLimit(1)
+                    Spacer()
+                    Button {
+                        audioData = nil
+                        audioFileName = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color(hex: "#8A96A8"))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .font(.system(size: 13, weight: .medium))
+                .padding(12)
+                .background(Color(hex: "#F7F9FC"))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+
+            Text(contentLanguage == .telugu ? "గరిష్ట ఆడియో పరిమాణం 700 KB" : "Maximum audio size: 700 KB")
+                .font(.caption)
+                .foregroundColor(Color(hex: "#8A96A8"))
+        }
+    }
+
+    private var audioDurationText: String {
+        guard let audioData, let player = try? AVAudioPlayer(data: audioData) else { return "0:00" }
+        let seconds = Int(player.duration.rounded())
+        return String(format: "%d:%02d", seconds / 60, seconds % 60)
+    }
+
+    private func loadAudioFile(from url: URL) {
+        let accessed = url.startAccessingSecurityScopedResource()
+        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url) else {
+            finishSaving(message: "Unable to read the selected audio file.")
+            return
+        }
+        acceptAudio(data, name: url.lastPathComponent)
+    }
+
+    private func toggleRecording() {
+        if audioRecorder.isRecording {
+            if let recording = audioRecorder.stopRecording() {
+                acceptAudio(recording, name: "Recording-\(Date().formatted(date: .numeric, time: .shortened)).m4a")
+            }
+        } else {
+            do {
+                try audioRecorder.startRecording()
+            } catch {
+                finishSaving(message: error.localizedDescription)
+            }
+        }
+    }
+
+    private func acceptAudio(_ data: Data, name: String) {
+        guard data.count <= 700_000 else {
+            finishSaving(message: language == .telugu ? "ఆడియో 700 KB కంటే తక్కువగా ఉండాలి." : "Audio must be smaller than 700 KB on the free plan.")
+            return
+        }
+        audioData = data
+        audioFileName = name
     }
 
     private func adminField(title: String, text: Binding<String>, placeholder: String) -> some View {
@@ -399,8 +748,10 @@ private struct AdminPostContentView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(Color(hex: "#1D2430"))
 
-            TextField(placeholder, text: text)
-                .padding(.horizontal, 12)
+            TextField(placeholder, text: text, axis: .vertical)
+                .lineLimit(1...6)
+                .padding(.leading, 12)
+                .padding(.trailing, text.wrappedValue.isEmpty ? 12 : 38)
                 .padding(.vertical, 11)
                 .background(Color(hex: "#F7F9FC"))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -408,6 +759,58 @@ private struct AdminPostContentView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
                 )
+                .overlay(alignment: .trailing) {
+                    if !text.wrappedValue.isEmpty {
+                        Button {
+                            text.wrappedValue = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(Color(hex: "#8A96A8"))
+                                .padding(11)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
         }
+    }
+}
+
+private final class AdminAudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate {
+    @Published var isRecording = false
+    private var recorder: AVAudioRecorder?
+    private var recordingURL: URL?
+
+    func startRecording() throws {
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.record, mode: .default)
+        try session.setActive(true)
+
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("admin-recording-\(UUID().uuidString).m4a")
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 22_050,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderBitRateKey: 48_000,
+            AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
+        ]
+        let recorder = try AVAudioRecorder(url: url, settings: settings)
+        recorder.delegate = self
+        recorder.prepareToRecord()
+        guard recorder.record() else {
+            throw NSError(domain: "AudioRecorder", code: 1, userInfo: [NSLocalizedDescriptionKey: "Recording could not start."])
+        }
+        self.recorder = recorder
+        recordingURL = url
+        isRecording = true
+    }
+
+    func stopRecording() -> Data? {
+        recorder?.stop()
+        recorder = nil
+        isRecording = false
+        try? AVAudioSession.sharedInstance().setActive(false)
+        guard let recordingURL else { return nil }
+        return try? Data(contentsOf: recordingURL)
     }
 }

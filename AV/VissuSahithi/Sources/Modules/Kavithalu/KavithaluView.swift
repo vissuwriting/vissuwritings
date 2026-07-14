@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 @available(iOS 16.0, *)
 struct KavithaluView: View {
@@ -90,11 +91,21 @@ struct KavithaluView: View {
             )
         }
         .onAppear {
-            kavithalu = KavithaItem.loadFromBundle(named: AppConstants.Kavithalu.jsonFileName)
+            loadKavithalu()
             positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
         }
         .onChange(of: selectedLanguageRaw) { _ in
             positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
+        }
+    }
+
+    private func loadKavithalu() {
+        let local = KavithaItem.loadFromBundle(named: AppConstants.Kavithalu.jsonFileName)
+        kavithalu = local
+        Firestore.firestore().collection("kavithalu").getDocuments { snapshot, _ in
+            let remote = snapshot?.documents.compactMap { KavithaItem(data: $0.data(), documentID: $0.documentID) } ?? []
+            let localTitles = Set(local.map { $0.title.lowercased() })
+            kavithalu = local + remote.filter { !localTitles.contains($0.title.lowercased()) }
         }
     }
 
@@ -268,6 +279,17 @@ struct KavithaluView: View {
     }
 
     private func deleteKavitha(_ item: KavithaItem) {
+        if let documentID = item.documentID {
+            Firestore.firestore().collection("kavithalu").document(documentID).delete { error in
+                guard error == nil else { return }
+                removeKavithaFromList(item)
+            }
+            return
+        }
+        removeKavithaFromList(item)
+    }
+
+    private func removeKavithaFromList(_ item: KavithaItem) {
         kavithalu.removeAll { $0.id == item.id }
         likedKavithaIDs.remove(item.id)
         likedCounts[item.id] = nil
@@ -296,6 +318,27 @@ private struct KavithaItem: Identifiable, Decodable, Hashable {
     let likes: Int
     let category: String
     let imageURL: String?
+    let imageData: Data?
+    let documentID: String?
+
+    init?(data: [String: Any], documentID: String) {
+        let englishTitle = data["title"] as? String
+        let teluguTitle = data["titleTelugu"] as? String
+        let englishBody = data["fullKavitha"] as? String
+        let teluguBody = data["fullKavithaTelugu"] as? String
+        guard let availableTitle = englishTitle ?? teluguTitle,
+              let availableBody = englishBody ?? teluguBody,
+              let category = data["category"] as? String else { return nil }
+        self.title = englishTitle ?? availableTitle
+        self.titleTelugu = teluguTitle
+        self.fullKavitha = englishBody ?? availableBody
+        self.fullKavithaTelugu = teluguBody
+        self.likes = (data["likes"] as? NSNumber)?.intValue ?? 0
+        self.category = category
+        self.imageURL = data["imageURL"] as? String
+        self.imageData = data["imageData"] as? Data
+        self.documentID = documentID
+    }
 
     var categoryKey: String {
         let lower = category.lowercased()
@@ -477,7 +520,11 @@ private struct KavithaPhotoView: View {
 
     var body: some View {
         Group {
-            if let url = URL(string: item.resolvedImageURL), !item.resolvedImageURL.isEmpty {
+            if let imageData = item.imageData, let image = UIImage(data: imageData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else if let url = URL(string: item.resolvedImageURL), !item.resolvedImageURL.isEmpty {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:

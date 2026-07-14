@@ -322,6 +322,7 @@ enum AppConstants {
     enum Songs {
         static let jsonFileName = "songs"
         static let jsonFileExtension = "json"
+        static let categories = ["Devotional", "Patriotic", "Classical", "Folk"]
 
         static let featuredTitleEnglish = "Featured Playlist"
         static let featuredTitleTelugu = "ప్రధాన ప్లేలిస్ట్"
