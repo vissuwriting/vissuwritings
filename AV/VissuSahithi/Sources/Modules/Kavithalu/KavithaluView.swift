@@ -286,34 +286,20 @@ struct KavithaluView: View {
                     .lineLimit(AppConstants.Kavithalu.cardPreviewLineLimit)
                     .padding(.top, AppConstants.Kavithalu.cardPreviewTopPadding)
 
-                HStack {
-                    if item.documentID != nil {
-                        Button {
-                            toggleLike(for: item)
-                        } label: {
-                            Label("\(displayLikes(for: item))", systemImage: likeSymbol(for: item))
-                                .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
-                                .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
-                        }
-                        .buttonStyle(.plain)
+                if item.documentID != nil {
+                    Button {
+                        toggleLike(for: item)
+                    } label: {
+                        Label("\(displayLikes(for: item))", systemImage: likeSymbol(for: item))
+                            .font(.system(size: AppConstants.Kavithalu.cardLikesFontSize))
+                            .foregroundColor(Color(hex: AppConstants.Kavithalu.likesColorHex))
                     }
-
-                    Spacer()
-
-                    if selectedCategoryKey == AppConstants.Kavithalu.Category.all {
-                        Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
-                            .font(.system(size: AppConstants.Kavithalu.cardCategoryFontSize, weight: .semibold))
-                            .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
-                            .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
-                            .padding(.vertical, AppConstants.Kavithalu.categoryVerticalPadding)
-                            .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
-                            .clipShape(Capsule())
-                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, AppConstants.Kavithalu.cardMetaTopPadding)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.top, AppConstants.Kavithalu.cardMetaTopPadding)
             }
             .padding(AppConstants.Kavithalu.cardContentPadding)
+            .padding(.trailing, selectedCategoryKey == AppConstants.Kavithalu.Category.all ? 70 : 0)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(.white)
         }
@@ -324,6 +310,18 @@ struct KavithaluView: View {
             RoundedRectangle(cornerRadius: AppConstants.Kavithalu.cardCornerRadius)
                 .stroke(Color(hex: AppConstants.Kavithalu.cardBorderColorHex), lineWidth: AppConstants.Kavithalu.cardStrokeWidth)
         )
+        .overlay(alignment: .trailing) {
+            if selectedCategoryKey == AppConstants.Kavithalu.Category.all {
+                Text(AppConstants.Kavithalu.categoryLabel(for: item.categoryKey, language: language))
+                    .font(.system(size: AppConstants.Kavithalu.cardCategoryFontSize, weight: .semibold))
+                    .foregroundColor(Color(hex: AppConstants.Kavithalu.categoryTextColorHex))
+                    .padding(.horizontal, AppConstants.Kavithalu.categoryHorizontalPadding)
+                    .padding(.vertical, AppConstants.Kavithalu.categoryVerticalPadding)
+                    .background(Color(hex: AppConstants.Kavithalu.categoryBackgroundColorHex))
+                    .clipShape(Capsule())
+                    .padding(.trailing, AppConstants.Kavithalu.cardContentPadding)
+            }
+        }
     }
 
     private func displayLikes(for item: KavithaItem) -> Int {
