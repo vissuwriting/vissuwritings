@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 import FirebaseFirestore
 
 @available(iOS 16.0, *)
@@ -16,7 +17,6 @@ struct KavithaluView: View {
 
     @State private var kavithalu: [KavithaItem] = []
     @State private var selectedCategoryKey: String = AppConstants.Kavithalu.defaultSelectedCategory
-    @State private var positiveTip: String = AppConstants.Kavithalu.initialPositiveTip
     @State private var selectedKavitha: KavithaItem?
     @State private var isDetailActive = false
     @State private var likedKavithaIDs: Set<UUID> = []
@@ -26,6 +26,13 @@ struct KavithaluView: View {
 
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguageRaw)
+    }
+
+    private var welcomeText: String {
+        let name = authSession.user?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fallbackName = authSession.user?.email?.split(separator: "@").first.map(String.init) ?? "User"
+        let displayName = (name?.isEmpty == false ? name : fallbackName) ?? fallbackName
+        return language == .telugu ? "స్వాగతం, \(displayName)!" : "Welcome, \(displayName) !"
     }
 
     @available(iOS 16.0, *)
@@ -121,10 +128,6 @@ struct KavithaluView: View {
         }
         .onAppear {
             loadKavithalu()
-            positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
-        }
-        .onChange(of: selectedLanguageRaw) { _ in
-            positiveTip = AppConstants.Kavithalu.positiveTips(for: language).randomElement() ?? positiveTip
         }
         .onDisappear {
             kavithaluListener?.remove()
@@ -216,7 +219,7 @@ struct KavithaluView: View {
                     .font(.system(size: AppConstants.Kavithalu.greetingTitleFontSize, weight: .bold))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.greetingTitleColorHex))
 
-                Text(positiveTip)
+                Text(welcomeText)
                     .font(.system(size: AppConstants.Kavithalu.greetingTipFontSize, weight: .medium))
                     .foregroundColor(Color(hex: AppConstants.Kavithalu.greetingTipColorHex))
             }

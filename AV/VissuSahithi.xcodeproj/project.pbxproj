@@ -103,11 +103,11 @@
 			);
 			mainGroup = 40F53EE42F5A91F4002BBBD9;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
-			productRefGroup = 40F53EEE2F5A91F4002BBBD9 /* Products */;
 			packageReferences = (
 				A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 40F53EEE2F5A91F4002BBBD9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -135,30 +135,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		A10000042F60000100000001 /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		A10000062F60000100000001 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */
 		40F53EF62F5A91F5002BBBD9 /* Debug */ = {
@@ -293,7 +269,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record audio for songs posted by administrators.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,7 +307,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record audio for songs posted by administrators.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -382,6 +356,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A10000042F60000100000001 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		A10000062F60000100000001 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000032F60000100000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 40F53EE52F5A91F4002BBBD9 /* Project object */;
 }

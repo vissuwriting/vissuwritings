@@ -7,8 +7,6 @@
 
 import SwiftUI
 import PhotosUI
-import AVFoundation
-import UniformTypeIdentifiers
 import Combine
 import FirebaseAuth
 import FirebaseFirestore
@@ -44,7 +42,6 @@ struct AdminView: View {
                 AdminManagementItem(destination: .contentModeration, icon: "checkmark.shield.fill", title: "కంటెంట్ మోడరేషన్", subtitle: "సమర్పించిన కంటెంట్‌ను సమీక్షించి నియంత్రించండి", badge: "", iconBgHex: "#FFF1E6", iconHex: "#F09A52", badgeBgHex: "#FFF1E6", badgeHex: "#F09A52"),
                 AdminManagementItem(destination: .analytics, icon: "chart.bar.xaxis", title: "అనలిటిక్స్ డాష్‌బోర్డ్", subtitle: "వివరణాత్మక వినియోగ గణాంకాలు చూడండి", badge: "", iconBgHex: "#F3ECFB", iconHex: "#B087D7", badgeBgHex: "#F3ECFB", badgeHex: "#B087D7"),
                 AdminManagementItem(destination: .kavithalu, icon: "book.closed.fill", title: "కవితలు కంటెంట్", subtitle: "కవితల సేకరణను నిర్వహించండి", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
-                AdminManagementItem(destination: .songs, icon: "music.note", title: "పాటలు కంటెంట్", subtitle: "ఆడియో కంటెంట్‌ను నిర్వహించండి", badge: "", iconBgHex: "#FFECEC", iconHex: "#E07B7B", badgeBgHex: "#FFECEC", badgeHex: "#E07B7B"),
                 AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "కథలు కంటెంట్", subtitle: "కథల కంటెంట్‌ను నిర్వహించండి", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
             ]
         }
@@ -54,8 +51,7 @@ struct AdminView: View {
             AdminManagementItem(destination: .contentModeration, icon: "checkmark.shield.fill", title: "Content Moderation", subtitle: "Review and moderate submitted content", badge: "", iconBgHex: "#FFF1E6", iconHex: "#F09A52", badgeBgHex: "#FFF1E6", badgeHex: "#F09A52"),
             AdminManagementItem(destination: .analytics, icon: "chart.bar.xaxis", title: "Analytics Dashboard", subtitle: "View detailed usage statistics", badge: "", iconBgHex: "#F3ECFB", iconHex: "#B087D7", badgeBgHex: "#F3ECFB", badgeHex: "#B087D7"),
             AdminManagementItem(destination: .kavithalu, icon: "book.closed.fill", title: "Post Kavithalu ", subtitle: "Manage poetry collection", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
-            AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "Post Stories ", subtitle: "Manage stories and narrative content", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75"),
-            AdminManagementItem(destination: .songs, icon: "music.note", title: "Post Songs ", subtitle: "Manage songs and audio ", badge: "", iconBgHex: "#FFECEC", iconHex: "#E07B7B", badgeBgHex: "#FFECEC", badgeHex: "#E07B7B")
+            AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "Post Stories ", subtitle: "Manage stories and narrative content", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
                     ]
     }
 
@@ -63,7 +59,7 @@ struct AdminView: View {
         managementItems.filter { item in
             switch selectedSection {
             case .post:
-                return [.kavithalu, .songs, .stories].contains(item.destination)
+                return [.kavithalu, .stories].contains(item.destination)
             case .overview:
                 return [.userManagement, .contentModeration, .analytics].contains(item.destination)
             case .settings:
@@ -191,8 +187,6 @@ struct AdminView: View {
             )
         case .kavithalu:
             AdminPostContentView(contentType: .kavithalu, language: language)
-        case .songs:
-            AdminPostContentView(contentType: .songs, language: language)
         case .stories:
             AdminPostContentView(contentType: .stories, language: language)
         }
@@ -217,7 +211,6 @@ private enum AdminDestination: Hashable {
     case contentModeration
     case analytics
     case kavithalu
-    case songs
     case stories
 }
 
@@ -520,13 +513,11 @@ private struct AdminPlaceholderView: View {
 
 enum AdminContentType {
     case kavithalu
-    case songs
     case stories
 
     var collectionName: String {
         switch self {
         case .kavithalu: return "kavithalu"
-        case .songs: return "songs"
         case .stories: return "stories"
         }
     }
@@ -534,7 +525,6 @@ enum AdminContentType {
     func title(_ language: AppLanguage) -> String {
         switch self {
         case .kavithalu: return language == .telugu ? "కవిత పోస్ట్ చేయండి" : "Post Kavitha"
-        case .songs: return language == .telugu ? "పాట పోస్ట్ చేయండి" : "Post Song"
         case .stories: return language == .telugu ? "కథ పోస్ట్ చేయండి" : "Post Story"
         }
     }
@@ -542,7 +532,6 @@ enum AdminContentType {
     func bodyPlaceholder(_ language: AppLanguage) -> String {
         switch self {
         case .kavithalu: return language == .telugu ? "కవితా పాఠ్యం" : "Kavitha content"
-        case .songs: return language == .telugu ? "పాట లిరిక్స్ లేదా వివరాలు" : "Song lyrics or details"
         case .stories: return language == .telugu ? "కథ పూర్తి పాఠ్యం" : "Story full content"
         }
     }
@@ -550,7 +539,6 @@ enum AdminContentType {
     func heroIcon() -> String {
         switch self {
         case .kavithalu: return "book.closed.fill"
-        case .songs: return "music.note"
         case .stories: return "text.book.closed.fill"
         }
     }
@@ -574,12 +562,6 @@ struct AdminPostContentView: View {
     @State private var content = ""
     @State private var author = ""
     @State private var summary = ""
-    @State private var duration = ""
-    @State private var audioURL = ""
-    @State private var audioData: Data?
-    @State private var audioFileName = ""
-    @State private var showingAudioImporter = false
-    @StateObject private var audioRecorder = AdminAudioRecorder()
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var selectedImageData: Data?
     @State private var showSavedAlert = false
@@ -623,25 +605,16 @@ struct AdminPostContentView: View {
                         placeholder: contentLanguage == .telugu ? "శీర్షిక నమోదు చేయండి" : "Enter title"
                     )
 
-                    if contentType == .kavithalu || contentType == .stories || contentType == .songs {
-                        categoryPicker
-                    }
-
-                    if contentType == .songs {
-                        songAudioPicker
-                    }
+                    categoryPicker
 
                     if contentType == .stories {
                         adminField(title: contentLanguage == .telugu ? "రచయిత" : "Author", text: $author, placeholder: contentLanguage == .telugu ? "రచయిత పేరు" : "Enter author")
                         adminField(title: contentLanguage == .telugu ? "సారాంశం" : "Summary", text: $summary, placeholder: contentLanguage == .telugu ? "సారాంశం నమోదు చేయండి" : "Enter summary")
                     }
 
-                    if contentType != .songs {
-                        imagePicker
-                    }
+                    imagePicker
 
-                    if contentType != .songs {
-                      VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(contentLanguage == .telugu ? "కంటెంట్" : "Content")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Color(hex: "#1D2430"))
@@ -678,7 +651,6 @@ struct AdminPostContentView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                      }
                     }
 
                 }
@@ -718,22 +690,13 @@ struct AdminPostContentView: View {
                 selectedImageData = try? await newPhoto.loadTransferable(type: Data.self)
             }
         }
-        .fileImporter(
-            isPresented: $showingAudioImporter,
-            allowedContentTypes: [.audio],
-            allowsMultipleSelection: false
-        ) { result in
-            guard case .success(let urls) = result, let url = urls.first else { return }
-            loadAudioFile(from: url)
-        }
     }
 
     private var isPostDisabled: Bool {
         isSaving
         || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        || (contentType != .songs && content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        || content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         || category.isEmpty
-        || (contentType == .songs && audioData == nil)
     }
 
     private var postButton: some View {
@@ -780,10 +743,6 @@ struct AdminPostContentView: View {
 
     private func postContent(publishNow: Bool) {
         isSaving = true
-        if contentType == .songs {
-            saveContent(imageData: nil, publishNow: publishNow)
-            return
-        }
         if let selectedImageData {
             guard let compressedImage = compressedImageData(from: selectedImageData) else {
                 finishSaving(message: language == .telugu ? "చిత్రాన్ని సిద్ధం చేయలేకపోయాము." : "Could not prepare the selected image.")
@@ -813,12 +772,6 @@ struct AdminPostContentView: View {
                 data["likes"] = 0
                 data["isPublished"] = publishNow
             }
-        case .songs:
-            collection = "songs"
-            data[contentLanguage == .telugu ? "genreTelugu" : "genre"] = category
-            if let audioData { data["audioData"] = audioData }
-            data["audioFileName"] = audioFileName
-            data["duration"] = audioDurationText
         case .stories:
             collection = "stories"
             data[contentLanguage == .telugu ? "authorTelugu" : "author"] = author
@@ -881,7 +834,6 @@ struct AdminPostContentView: View {
     private func clearForm() {
         title = ""; category = ""; content = ""
         author = ""; summary = ""
-        duration = ""; audioURL = ""; audioData = nil; audioFileName = ""
         selectedPhoto = nil; selectedImageData = nil
     }
 
@@ -891,8 +843,6 @@ struct AdminPostContentView: View {
             return Array(AppConstants.Kavithalu.categoryKeys.dropFirst())
         case .stories:
             return Array(AppConstants.Story.categories.dropFirst())
-        case .songs:
-            return AppConstants.Songs.categories
         }
     }
 
@@ -902,8 +852,6 @@ struct AdminPostContentView: View {
             return AppConstants.Kavithalu.categoryLabel(for: value, language: contentLanguage == .telugu ? .telugu : .english)
         case .stories:
             return AppConstants.Story.categoryLabel(value, contentLanguage == .telugu ? .telugu : .english)
-        case .songs:
-            return value
         }
     }
 
@@ -973,101 +921,6 @@ struct AdminPostContentView: View {
         }
     }
 
-    private var songAudioPicker: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(contentLanguage == .telugu ? "ఆడియో" : "Audio")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color(hex: "#1D2430"))
-
-            HStack(spacing: 10) {
-                Button {
-                    showingAudioImporter = true
-                } label: {
-                    Label(contentLanguage == .telugu ? "ఫైల్" : "Choose File", systemImage: "folder")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button {
-                    toggleRecording()
-                } label: {
-                    Label(
-                        audioRecorder.isRecording ? (contentLanguage == .telugu ? "ఆపు" : "Stop") : (contentLanguage == .telugu ? "రికార్డ్" : "Record"),
-                        systemImage: audioRecorder.isRecording ? "stop.circle.fill" : "mic.circle.fill"
-                    )
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(audioRecorder.isRecording ? .red : Color(hex: "#2F82D8"))
-            }
-
-            if !audioFileName.isEmpty {
-                HStack {
-                    Image(systemName: "waveform.circle.fill")
-                        .foregroundColor(Color(hex: "#59A26B"))
-                    Text(audioFileName)
-                        .lineLimit(1)
-                    Spacer()
-                    Button {
-                        audioData = nil
-                        audioFileName = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(Color(hex: "#8A96A8"))
-                    }
-                    .buttonStyle(.plain)
-                }
-                .font(.system(size: 13, weight: .medium))
-                .padding(12)
-                .background(Color(hex: "#F7F9FC"))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-
-            Text(contentLanguage == .telugu ? "గరిష్ట ఆడియో పరిమాణం 700 KB" : "Maximum audio size: 700 KB")
-                .font(.caption)
-                .foregroundColor(Color(hex: "#8A96A8"))
-        }
-    }
-
-    private var audioDurationText: String {
-        guard let audioData, let player = try? AVAudioPlayer(data: audioData) else { return "0:00" }
-        let seconds = Int(player.duration.rounded())
-        return String(format: "%d:%02d", seconds / 60, seconds % 60)
-    }
-
-    private func loadAudioFile(from url: URL) {
-        let accessed = url.startAccessingSecurityScopedResource()
-        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-        guard let data = try? Data(contentsOf: url) else {
-            finishSaving(message: "Unable to read the selected audio file.")
-            return
-        }
-        acceptAudio(data, name: url.lastPathComponent)
-    }
-
-    private func toggleRecording() {
-        if audioRecorder.isRecording {
-            if let recording = audioRecorder.stopRecording() {
-                acceptAudio(recording, name: "Recording-\(Date().formatted(date: .numeric, time: .shortened)).m4a")
-            }
-        } else {
-            do {
-                try audioRecorder.startRecording()
-            } catch {
-                finishSaving(message: error.localizedDescription)
-            }
-        }
-    }
-
-    private func acceptAudio(_ data: Data, name: String) {
-        guard data.count <= 700_000 else {
-            finishSaving(message: language == .telugu ? "ఆడియో 700 KB కంటే తక్కువగా ఉండాలి." : "Audio must be smaller than 700 KB on the free plan.")
-            return
-        }
-        audioData = data
-        audioFileName = name
-    }
-
     private func adminField(title: String, text: Binding<String>, placeholder: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -1098,45 +951,5 @@ struct AdminPostContentView: View {
                     }
                 }
         }
-    }
-}
-
-private final class AdminAudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate {
-    @Published var isRecording = false
-    private var recorder: AVAudioRecorder?
-    private var recordingURL: URL?
-
-    func startRecording() throws {
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .default)
-        try session.setActive(true)
-
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("admin-recording-\(UUID().uuidString).m4a")
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 22_050,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderBitRateKey: 48_000,
-            AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue
-        ]
-        let recorder = try AVAudioRecorder(url: url, settings: settings)
-        recorder.delegate = self
-        recorder.prepareToRecord()
-        guard recorder.record() else {
-            throw NSError(domain: "AudioRecorder", code: 1, userInfo: [NSLocalizedDescriptionKey: "Recording could not start."])
-        }
-        self.recorder = recorder
-        recordingURL = url
-        isRecording = true
-    }
-
-    func stopRecording() -> Data? {
-        recorder?.stop()
-        recorder = nil
-        isRecording = false
-        try? AVAudioSession.sharedInstance().setActive(false)
-        guard let recordingURL else { return nil }
-        return try? Data(contentsOf: recordingURL)
     }
 }
