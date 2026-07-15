@@ -339,8 +339,8 @@ enum AppConstants {
         static let kavithaluTitle = "Kavithalu"
         static let kavithaluTitleFont = Font.largeTitle
 
-        static let kavithaluTabIcon = "book.pages.fill"
-        static let storyTabIcon = "text.book.closed.fill"
+        static let kavithaluTabIcon = "quote.bubble.fill"
+        static let storyTabIcon = "book.closed.fill"
         static let adminTabIcon = "person.crop.circle.fill"
 
         static func kavithaluTabTitle(_ language: AppLanguage) -> String {
@@ -393,6 +393,8 @@ enum AppConstants {
         static let fieldBackgroundColor = Color.white
         static let waveFillColor = Color.white
         static let textFieldIconColor = Color.gray
+        static let placeholderColor = Color(red: 0.42, green: 0.46, blue: 0.53)
+        static let fieldTextColor = Color(red: 0.11, green: 0.14, blue: 0.19)
         static let bottomTextColor = Color.gray
         static let accentColor = Color.red
         static let fieldBorderColor = Color.red
@@ -461,6 +463,8 @@ enum AppConstants {
 
         static let backgroundColor = Color(red: 0.94, green: 0.42, blue: 0.40)
         static let textFieldIconColor = Color.gray
+        static let placeholderColor = Color(red: 0.42, green: 0.46, blue: 0.53)
+        static let fieldTextColor = Color(red: 0.11, green: 0.14, blue: 0.19)
         static let bottomTextColor = Color.gray
         static let fieldBorderColor = Color.red
 

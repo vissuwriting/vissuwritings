@@ -67,6 +67,8 @@ struct SigninView: View {
                 }
             }
         }
+        .font(.system(size: 17, design: .serif))
+        .italic()
     }
 }
 
@@ -78,7 +80,8 @@ extension SigninView {
             VStack(spacing: AppConstants.Brand.titleSpacing) {
                 HStack(spacing: 8) {
                     Text(AppConstants.Brand.primaryTitle(for: language))
-                        .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
+                        .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .serif))
+                        .italic()
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [
@@ -138,7 +141,15 @@ extension SigninView {
                     Image(systemName: AppConstants.Signin.emailIcon)
                         .foregroundColor(AppConstants.Signin.textFieldIconColor)
                     
-                    TextField(AppConstants.Signin.emailPlaceholder(for: language), text: $email)
+                    TextField(
+                        "",
+                        text: $email,
+                        prompt: Text(AppConstants.Signin.emailPlaceholder(for: language))
+                            .font(.system(size: 17, weight: .medium, design: .serif))
+                            .italic()
+                            .foregroundColor(AppConstants.Signin.placeholderColor)
+                    )
+                        .foregroundColor(AppConstants.Signin.fieldTextColor)
                         .autocapitalization(.none)
                         .focused($focusedField, equals: .email)
                         .submitLabel(.next)
@@ -168,11 +179,26 @@ extension SigninView {
                     
                     Group {
                         if isPasswordVisible {
-                            TextField(AppConstants.Signin.passwordPlaceholder(for: language), text: $password)
+                            TextField(
+                                "",
+                                text: $password,
+                                prompt: Text(AppConstants.Signin.passwordPlaceholder(for: language))
+                                    .font(.system(size: 17, weight: .medium, design: .serif))
+                                    .italic()
+                                    .foregroundColor(AppConstants.Signin.placeholderColor)
+                            )
                         } else {
-                            SecureField(AppConstants.Signin.passwordPlaceholder(for: language), text: $password)
+                            SecureField(
+                                "",
+                                text: $password,
+                                prompt: Text(AppConstants.Signin.passwordPlaceholder(for: language))
+                                    .font(.system(size: 17, weight: .medium, design: .serif))
+                                    .italic()
+                                    .foregroundColor(AppConstants.Signin.placeholderColor)
+                            )
                         }
                     }
+                    .foregroundColor(AppConstants.Signin.fieldTextColor)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .focused($focusedField, equals: .password)

@@ -27,6 +27,43 @@ struct AdminView: View {
     @AppStorage(AppConstants.editModeStorageKey) private var isEditModeEnabled = false
     @State private var selectedSection = AdminSection.post
 
+    init() {
+        let titleColor = UIColor(red: 29 / 255, green: 36 / 255, blue: 48 / 255, alpha: 1)
+        let selectedBackground = UIColor(red: 190 / 255, green: 218 / 255, blue: 204 / 255, alpha: 1)
+        let segmentBackground = UIColor(red: 232 / 255, green: 237 / 255, blue: 243 / 255, alpha: 1)
+        let switchOffColor = UIColor(red: 190 / 255, green: 199 / 255, blue: 210 / 255, alpha: 1)
+
+        UISegmentedControl.appearance().selectedSegmentTintColor = selectedBackground
+        UISegmentedControl.appearance().backgroundColor = segmentBackground
+        UISegmentedControl.appearance().layer.borderColor = UIColor(red: 174 / 255, green: 187 / 255, blue: 201 / 255, alpha: 1).cgColor
+        UISegmentedControl.appearance().layer.borderWidth = 1
+        UISegmentedControl.appearance().layer.cornerRadius = 9
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: titleColor, .font: UIFont.systemFont(ofSize: 14, weight: .semibold)],
+            for: .normal
+        )
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: titleColor, .font: UIFont.systemFont(ofSize: 14, weight: .bold)],
+            for: .selected
+        )
+
+        UINavigationBar.appearance().titleTextAttributes = [
+            .foregroundColor: titleColor,
+            .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
+        ]
+        UINavigationBar.appearance().largeTitleTextAttributes = [
+            .foregroundColor: titleColor,
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
+
+        UISwitch.appearance().onTintColor = selectedBackground
+        UISwitch.appearance().tintColor = switchOffColor
+        UISwitch.appearance().backgroundColor = .clear
+        UISwitch.appearance().layer.borderColor = switchOffColor.cgColor
+        UISwitch.appearance().layer.borderWidth = 1.5
+        UISwitch.appearance().layer.cornerRadius = 16
+    }
+
     private var language: AppLanguage {
         AppLanguage.from(selectedLanguage)
     }
@@ -41,8 +78,8 @@ struct AdminView: View {
                 AdminManagementItem(destination: .userManagement, icon: "person.2.badge.gearshape.fill", title: "యూజర్ మేనేజ్‌మెంట్", subtitle: "యూజర్ ఖాతాలు మరియు పాత్రలను నిర్వహించండి", badge: "", iconBgHex: "#EAF3FB", iconHex: "#53A6E8", badgeBgHex: "#EAF3FB", badgeHex: "#5FADE9"),
                 AdminManagementItem(destination: .contentModeration, icon: "checkmark.shield.fill", title: "కంటెంట్ మోడరేషన్", subtitle: "సమర్పించిన కంటెంట్‌ను సమీక్షించి నియంత్రించండి", badge: "", iconBgHex: "#FFF1E6", iconHex: "#F09A52", badgeBgHex: "#FFF1E6", badgeHex: "#F09A52"),
                 AdminManagementItem(destination: .analytics, icon: "chart.bar.xaxis", title: "అనలిటిక్స్ డాష్‌బోర్డ్", subtitle: "వివరణాత్మక వినియోగ గణాంకాలు చూడండి", badge: "", iconBgHex: "#F3ECFB", iconHex: "#B087D7", badgeBgHex: "#F3ECFB", badgeHex: "#B087D7"),
-                AdminManagementItem(destination: .kavithalu, icon: "book.closed.fill", title: "కవితలు కంటెంట్", subtitle: "కవితల సేకరణను నిర్వహించండి", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
-                AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "కథలు కంటెంట్", subtitle: "కథల కంటెంట్‌ను నిర్వహించండి", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
+                AdminManagementItem(destination: .kavithalu, icon: "quote.bubble.fill", title: "కవితలు కంటెంట్", subtitle: "కవితల సేకరణను నిర్వహించండి", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
+                AdminManagementItem(destination: .stories, icon: "book.closed.fill", title: "కథలు కంటెంట్", subtitle: "కథల కంటెంట్‌ను నిర్వహించండి", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
             ]
         }
 
@@ -50,8 +87,8 @@ struct AdminView: View {
             AdminManagementItem(destination: .userManagement, icon: "person.2.badge.gearshape.fill", title: "User Management", subtitle: "Manage user accounts and roles", badge: "", iconBgHex: "#EAF3FB", iconHex: "#53A6E8", badgeBgHex: "#EAF3FB", badgeHex: "#5FADE9"),
             AdminManagementItem(destination: .contentModeration, icon: "checkmark.shield.fill", title: "Content Moderation", subtitle: "Review and moderate submitted content", badge: "", iconBgHex: "#FFF1E6", iconHex: "#F09A52", badgeBgHex: "#FFF1E6", badgeHex: "#F09A52"),
             AdminManagementItem(destination: .analytics, icon: "chart.bar.xaxis", title: "Analytics Dashboard", subtitle: "View detailed usage statistics", badge: "", iconBgHex: "#F3ECFB", iconHex: "#B087D7", badgeBgHex: "#F3ECFB", badgeHex: "#B087D7"),
-            AdminManagementItem(destination: .kavithalu, icon: "book.closed.fill", title: "Post Kavithalu ", subtitle: "Manage poetry collection", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
-            AdminManagementItem(destination: .stories, icon: "text.book.closed.fill", title: "Post Stories ", subtitle: "Manage stories and narrative content", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
+            AdminManagementItem(destination: .kavithalu, icon: "quote.bubble.fill", title: "Post Kavithalu ", subtitle: "Manage poetry collection", badge: "", iconBgHex: "#EDF1F4", iconHex: "#6C7A8A", badgeBgHex: "#EDF1F4", badgeHex: "#6C7A8A"),
+            AdminManagementItem(destination: .stories, icon: "book.closed.fill", title: "Post Stories ", subtitle: "Manage stories and narrative content", badge: "", iconBgHex: "#E8F6EC", iconHex: "#56BA75", badgeBgHex: "#E8F6EC", badgeHex: "#56BA75")
                     ]
     }
 
@@ -81,6 +118,7 @@ struct AdminView: View {
                             }
                         }
                         .pickerStyle(.segmented)
+                        .colorScheme(.light)
 
                         ForEach(visibleManagementItems) { item in
                             NavigationLink(value: item.destination) {
@@ -106,7 +144,7 @@ struct AdminView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
+                                    .stroke(Color(hex: "#C5D3E1"), lineWidth: 1.5)
                             )
                         }
                     }
@@ -118,6 +156,7 @@ struct AdminView: View {
             .navigationDestination(for: AdminDestination.self) { destination in
                 destinationView(for: destination) .tabBarHidden()
             }
+            .toolbarColorScheme(.light, for: .navigationBar)
         }
     }
 
@@ -140,7 +179,7 @@ struct AdminView: View {
 
                 Text(item.subtitle)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color(hex: "#95A1B2"))
+                    .foregroundColor(Color(hex: "#64748B"))
                     .fixedSize(horizontal: false, vertical: true)
             }
 
@@ -166,7 +205,7 @@ struct AdminView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(hex: "#E8EDF4"), lineWidth: 1)
+                .stroke(Color(hex: "#C5D3E1"), lineWidth: 1.5)
         )
     }
 
@@ -307,8 +346,18 @@ private struct AdminUserManagementView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AppColors.background.ignoresSafeArea())
-        .navigationTitle(language == .telugu ? "యూజర్లు" : "Registered Users")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(language == .telugu ? "యూజర్లు" : "Registered Users")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1D2430"))
+            }
+        }
+        .toolbarColorScheme(.light, for: .navigationBar)
+        .toolbarBackground(Color.white, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .onAppear(perform: observeUsers)
         .onDisappear {
             listener?.remove()
@@ -316,7 +365,10 @@ private struct AdminUserManagementView: View {
         }
         .sheet(item: $selectedUser) { user in
             userDetailsSheet(user)
-                .presentationDetents([.medium, .large])
+                .presentationDetents([
+                    .height(user.id == Auth.auth().currentUser?.uid ? 430 : 490),
+                    .large
+                ])
                 .presentationDragIndicator(.visible)
         }
     }
@@ -336,7 +388,7 @@ private struct AdminUserManagementView: View {
         .padding(.vertical, 9)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.22), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "#C5D3E1"), lineWidth: 1.5))
     }
 
     private func userCard(_ user: AdminUserRecord) -> some View {
@@ -374,12 +426,14 @@ private struct AdminUserManagementView: View {
         .padding(14)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 15))
-        .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color(hex: "#E5EAF1"), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color(hex: "#C5D3E1"), lineWidth: 1.5))
     }
 
     private func userDetailsSheet(_ user: AdminUserRecord) -> some View {
-        NavigationStack {
-            VStack(spacing: 18) {
+        ZStack(alignment: .topLeading) {
+            AppColors.background.ignoresSafeArea()
+
+            VStack(spacing: 12) {
                 Text(user.initials)
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
@@ -388,8 +442,10 @@ private struct AdminUserManagementView: View {
                     .clipShape(Circle())
 
                 VStack(spacing: 5) {
-                    Text(user.name).font(.title3.bold())
-                    Text(user.email).foregroundColor(.secondary)
+                    Text(user.name)
+                        .font(.title3.bold())
+                        .foregroundColor(Color(hex: "#1D2430"))
+                    Text(user.email).foregroundColor(Color(hex: "#596579"))
                     HStack {
                         Text(user.role.capitalized)
                         Text("•")
@@ -406,8 +462,12 @@ private struct AdminUserManagementView: View {
                     detailRow("Email", value: user.emailVerified ? "Verified" : "Not verified")
                 }
                 .padding(.horizontal)
-                .background(Color(hex: "#F7F9FC"))
+                .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color(hex: "#C5D3E1"), lineWidth: 1.5)
+                )
 
                 if user.id != Auth.auth().currentUser?.uid {
                     Button {
@@ -420,25 +480,38 @@ private struct AdminUserManagementView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(user.blocked || user.accountStatus == "blocked" ? .green : .orange)
                 }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .frame(maxWidth: .infinity, alignment: .top)
 
-                Spacer()
+            Button {
+                selectedUser = nil
+            } label: {
+                Text("Close")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Color(hex: "#2F82D8"))
+                    .fixedSize()
+                    .padding(.horizontal, 12)
+                    .frame(height: 36)
+                    .background(Color.white)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(Color(hex: "#C5D3E1"), lineWidth: 1))
             }
-            .padding(10)
-           
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { selectedUser = nil }
-                }
-            }
+            .buttonStyle(.plain)
+            .padding(.leading, 16)
+            .padding(.top, 14)
         }
+        .preferredColorScheme(.light)
     }
 
     private func detailRow(_ title: String, value: String) -> some View {
         HStack {
-            Text(title).foregroundColor(.secondary)
+            Text(title).foregroundColor(Color(hex: "#596579"))
             Spacer()
-            Text(value).fontWeight(.medium)
+            Text(value)
+                .fontWeight(.medium)
+                .foregroundColor(Color(hex: "#1D2430"))
         }
         .font(.subheadline)
         .padding(.vertical, 12)
@@ -494,7 +567,7 @@ private struct AdminPlaceholderView: View {
             VStack(spacing: 14) {
                 Image(systemName: "sparkles.rectangle.stack")
                     .font(.system(size: 38, weight: .semibold))
-                    .foregroundColor(Color(hex: "#8A96A8"))
+                    .foregroundColor(Color(hex: "#596579"))
 
                 Text(title)
                     .font(.system(size: 26, weight: .bold, design: .rounded))
@@ -538,8 +611,8 @@ enum AdminContentType {
 
     func heroIcon() -> String {
         switch self {
-        case .kavithalu: return "book.closed.fill"
-        case .stories: return "text.book.closed.fill"
+        case .kavithalu: return "quote.bubble.fill"
+        case .stories: return "book.closed.fill"
         }
     }
 }
@@ -621,6 +694,7 @@ struct AdminPostContentView: View {
 
                         ZStack(alignment: .topLeading) {
                             TextEditor(text: $content)
+                                .foregroundColor(Color(hex: "#1D2430"))
                                 .frame(height: contentEditorHeight)
                                 .padding(8)
                                 .scrollContentBackground(.hidden)
@@ -634,7 +708,7 @@ struct AdminPostContentView: View {
                             if content.isEmpty {
                                 Text(contentType.bodyPlaceholder(contentLanguage == .telugu ? .telugu : .english))
                                     .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(Color(hex: "#A1ACBC"))
+                                    .foregroundColor(Color(hex: "#64748B"))
                                     .padding(.top, 20)
                                     .padding(.leading, 14)
                             }
@@ -659,7 +733,7 @@ struct AdminPostContentView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(hex: "#E5EAF1"), lineWidth: 1)
+                        .stroke(Color(hex: "#C5D3E1"), lineWidth: 1.5)
                 )
 
                 if isSaving {
@@ -669,9 +743,16 @@ struct AdminPostContentView: View {
             .padding(16)
         }
         .background(AppColors.background.ignoresSafeArea())
-        .navigationTitle(editingDocumentID == nil ? contentType.title(language) : (language == .telugu ? "పోస్ట్ సవరించండి" : "Edit Post"))
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(editingDocumentID == nil ? contentType.title(language) : (language == .telugu ? "పోస్ట్ సవరించండి" : "Edit Post"))
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1D2430"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 10) {
                 if contentType == .kavithalu && editingDocumentID == nil {
@@ -681,6 +762,9 @@ struct AdminPostContentView: View {
                 }
             }
         }
+        .toolbarColorScheme(.light, for: .navigationBar)
+        .toolbarBackground(Color.white, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .alert(saveMessage, isPresented: $showSavedAlert) {
             Button(language == .telugu ? "సరే" : "OK", role: .cancel) {}
         }
@@ -868,7 +952,7 @@ struct AdminPostContentView: View {
             } label: {
                 HStack {
                     Text(category.isEmpty ? (contentLanguage == .telugu ? "వర్గాన్ని ఎంచుకోండి" : "Select category") : categoryTitle(category))
-                        .foregroundColor(category.isEmpty ? Color(hex: "#A1ACBC") : Color(hex: "#1D2430"))
+                        .foregroundColor(category.isEmpty ? Color(hex: "#64748B") : Color(hex: "#1D2430"))
                     Spacer()
                     Image(systemName: "chevron.down")
                         .foregroundColor(Color(hex: "#8A96A8"))
@@ -927,7 +1011,13 @@ struct AdminPostContentView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(Color(hex: "#1D2430"))
 
-            TextField(placeholder, text: text, axis: .vertical)
+            TextField(
+                "",
+                text: text,
+                prompt: Text(placeholder).foregroundColor(Color(hex: "#64748B")),
+                axis: .vertical
+            )
+                .foregroundColor(Color(hex: "#1D2430"))
                 .lineLimit(1...6)
                 .padding(.leading, 12)
                 .padding(.trailing, text.wrappedValue.isEmpty ? 12 : 38)

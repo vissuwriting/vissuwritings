@@ -62,6 +62,8 @@ struct SignupView: View {
         .onTapGesture {
             dismissKeyboard()
         }
+        .font(.system(size: 17, design: .serif))
+        .italic()
     }
 }
 
@@ -73,7 +75,8 @@ extension SignupView {
             VStack(spacing: AppConstants.Brand.titleSpacing) {
                 HStack(spacing: 8) {
                     Text(AppConstants.Brand.primaryTitle(for: language))
-                        .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .rounded))
+                        .font(.system(size: AppConstants.Brand.primaryFontSize, weight: .heavy, design: .serif))
+                        .italic()
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [
@@ -247,7 +250,15 @@ extension SignupView {
             Image(systemName: icon)
                 .foregroundColor(AppConstants.Signup.textFieldIconColor)
             
-            TextField(placeholder, text: text)
+            TextField(
+                "",
+                text: text,
+                prompt: Text(placeholder)
+                    .font(.system(size: 17, weight: .medium, design: .serif))
+                    .italic()
+                    .foregroundColor(AppConstants.Signup.placeholderColor)
+            )
+                .foregroundColor(AppConstants.Signup.fieldTextColor)
                 .autocapitalization(.none)
         }
         .padding()
@@ -273,11 +284,26 @@ extension SignupView {
             
             Group {
                 if isVisible.wrappedValue {
-                    TextField(placeholder, text: text)
+                    TextField(
+                        "",
+                        text: text,
+                        prompt: Text(placeholder)
+                            .font(.system(size: 17, weight: .medium, design: .serif))
+                            .italic()
+                            .foregroundColor(AppConstants.Signup.placeholderColor)
+                    )
                 } else {
-                    SecureField(placeholder, text: text)
+                    SecureField(
+                        "",
+                        text: text,
+                        prompt: Text(placeholder)
+                            .font(.system(size: 17, weight: .medium, design: .serif))
+                            .italic()
+                            .foregroundColor(AppConstants.Signup.placeholderColor)
+                    )
                 }
             }
+            .foregroundColor(AppConstants.Signup.fieldTextColor)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
 

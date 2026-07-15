@@ -143,10 +143,12 @@ struct UserProfileView: View {
 
     private func profileRow(_ title: String, value: String) -> some View {
         HStack(alignment: .top) {
-            Text(title).foregroundColor(Color(hex: "#7A8698"))
+            Text(title)
+                .foregroundColor(Color(hex: "#596579"))
             Spacer(minLength: 12)
             Text(value)
                 .fontWeight(.semibold)
+                .foregroundColor(Color(hex: "#1D2430"))
                 .multilineTextAlignment(.trailing)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
